@@ -27,7 +27,7 @@ X.quali <- splitmix(wio_mpas_pca)$X.quali
 pca<-PCAmix(X.quanti,X.quali,ndim=20,rename.level=TRUE)
 pca<-PCAmix(X.quanti,X.quali,ndim=20,graph=FALSE, rename.level=TRUE)
 
-# Dimension eigenvalue, share observed and cumulative share 
+# Dimension eigenvalue, share observed, cumulative shareand squared cosines
 
 pca_eig<-pca$eig
 
@@ -39,6 +39,13 @@ variable_contri_pct<-as.data.frame(pca$quanti$contrib.pct)
 
 write_csv(variable_contri_pct, "variable_contri_pct.csv")
 
+ind_cos2<-as.data.frame(pca$ind$cos2)
+
+variable_cos2<-as.data.frame(pca$quanti$cos2)
+
+write.csv(ind_cos2, "ind_cos2.csv")
+
+write.csv(variable_cos2, "variable_cos2.csv")
 
 # Compare with broken stick values
 # bstick(length(res.pcamix$eig[, 1]), tot.inertia = sum(res.pcamix$eig[, 1]))
