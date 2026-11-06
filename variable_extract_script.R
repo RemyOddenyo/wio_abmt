@@ -8,7 +8,7 @@ rm(list=ls())
 
 # Load MPA and land polygons
 wiompas <- st_read("/Users/48483117/OneDrive - Macquarie University/Documents/wiompas_fin.shp")
-wiompas_v <- vect("/Users/48483117/OneDrive - Macquarie University/Documents/wiompas_fin.shp")
+wiompas$ROW_ID <- seq_len(nrow(wiompas))#  add an ID column
 land<-st_read("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/chapter_3_governance effectiveness at different scales in the SWIO/data/gis/S2Coast_2023.shp")
 
 land_transform<-st_transform(land, st_crs(wiompas_v)) # streamline projections
@@ -21,6 +21,8 @@ seagrass_bed<-rast("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/c
 mangrove<-rast("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/Chapter_3_governance effectiveness at different scales in the SWIO/data/wiosym/eco/mangrove.tif")
 coral_reef_fish<-rast("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/Chapter_3_governance effectiveness at different scales in the SWIO/data/wiosym/eco/coral_reef_fish.tif")
 
+#Load connectivity data 
+wiompa_connect <- st_read("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/chapter_3_governance effectiveness at different scales in the SWIO/data/gis/Global_connectivity_active_connectance_shapefile/Global_connectivity_active_connectance.shp")
 
 # Load environmental factors
 
@@ -30,10 +32,10 @@ o2 <- rast("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/
 phyc <- rast("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/chapter_3_governance effectiveness at different scales in the SWIO/data/environmental/phyc_baseline_2000_2020_depthsurf_b57c_78d1_ca7a_U1791756235321.nc")
 so <- rast("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/chapter_3_governance effectiveness at different scales in the SWIO/data/environmental/so_baseline_2000_2019_depthsurf_49ed_5fc4_602c_U1791756130515.nc")
 thetao <- rast("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/chapter_3_governance effectiveness at different scales in the SWIO/data/environmental/thetao_baseline_2000_2019_depthsurf_74ff_39fa_9adc_U1791756072928.nc")
-gravity<-rast("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/Chapter_3_governance effectiveness at different scales in the SWIO/data/gis/wio_gravity_of_markets_maina/wio_gravity_of_markets_maina/logGRAV_WIO_7k.tif")
 
 # Load human pressures
-
+travel_time<-st_read("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/Chapter_3_governance effectiveness at different scales in the SWIO/data/gis/Gravity/Global Gravity of Coral Reefs 2.0.shp")
+gravity<-rast("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/Chapter_3_governance effectiveness at different scales in the SWIO/data/gis/wio_gravity_of_markets_maina/wio_gravity_of_markets_maina/logGRAV_WIO_7k.tif")
 artisanal_fishing<-rast("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/Chapter_3_governance effectiveness at different scales in the SWIO/data/wiosym/pres/artisanal_fishing.tif")
 coastal_tourism<-rast("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/Chapter_3_governance effectiveness at different scales in the SWIO/data/wiosym/pres/coastal_tourism.tif")
 demersal_gillnet<-rast("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/Chapter_3_governance effectiveness at different scales in the SWIO/data/wiosym/pres/demersal_gillnet.tif")
@@ -53,17 +55,64 @@ sea_level_rise<-rast("/Users/48483117/OneDrive - Macquarie University/Remy's PhD
 temperature_rise<-rast("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/Chapter_3_governance effectiveness at different scales in the SWIO/data/wiosym/pres/temperature_rise.tif")
 weighted_longline<-rast("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/Chapter_3_governance effectiveness at different scales in the SWIO/data/wiosym/pres/weighted_longline.tif")
 
-
-# Turn  MPA SpatVector attributes into a data.frame and add an ID column
-wiompas_df<-as.data.frame(wiompas_v)
-wiompas_df$ROW_ID <- seq_len(nrow(wiompas_df))
-
+#se function
+se <- function(x, na.rm = FALSE) {
+  if (na.rm) x <- x[!is.na(x)]
+  sd(x) / sqrt(length(x))
+}
 
 # Define a buffer distances vector
 buffer_distance <- 35000
 
 # Create polygon buffer using sf
 buf_wiompas <- st_buffer(wiompas, dist = buffer_distance)
+
+###~~~ connectivity matrix summaries for resident and cryptobenthic spawners
+
+
+wiompa_connect_projected<- st_transform(wiompa_connect, crs(wiompas)) # streamline projections
+wiompa_connect_projected<- st_crop(wiompa_connect_projected, wio_bbox) # crop to wio region
+
+
+wiompa_connect_joined<- st_join(buf_wiompas, wiompa_connect_projected)
+
+wiompa_connect_joined <- wiompa_connect_joined %>%
+  st_drop_geometry()
+
+#wiompa_connect_one_node<- wiompa_connect_joined[rownames(wiompa_connect_joined)  %in% c("15","18","21",),]
+
+wiompa_connect_summary <- wiompa_connect_joined %>%
+  st_drop_geometry() %>%
+  group_by(ROW_ID) %>%
+  summarise(
+    point_count = n(),
+    mean_ConnAct = mean(ConnAct, na.rm = TRUE), # mean
+    sd_ConnAct   = sd(ConnAct, na.rm = TRUE),    # standard deviation
+    se_ConnAct   = se(ConnAct, na.rm = TRUE),    # standard error
+    med_ConnAct   = median(ConnAct, na.rm = TRUE),    #median
+    sum_ConnAct  = sum(ConnAct, na.rm = TRUE),   # sum
+    min_ConnAct  = min(ConnAct, na.rm = TRUE),    # minimum value
+    max_ConnAct  = max(ConnAct, na.rm = TRUE),    # maximum value
+    mean_ConnInAct = mean(ConnInAct, na.rm = TRUE), # mean
+    sd_ConnInAct   = sd(ConnInAct, na.rm = TRUE),    # standard deviation
+    se_ConnInAct   = se(ConnInAct, na.rm = TRUE),    # standard error
+    med_ConnInAct   = median(ConnInAct, na.rm = TRUE),    #median
+    sum_ConnInAct  = sum(ConnInAct, na.rm = TRUE),   # sum
+    min_ConnInAct  = min(ConnInAct, na.rm = TRUE),    # minimum value
+    max_ConnInAct  = max(ConnInAct, na.rm = TRUE),    # maximum value
+    mean_ConnOtAct = mean(ConnOtAct, na.rm = TRUE), # mean
+    sd_ConnOtAct   = sd(ConnOtAct, na.rm = TRUE),    # standard deviation
+    se_ConnOtAct   = se(ConnOtAct, na.rm = TRUE),    # standard error
+    med_ConnOtAct   = median(ConnOtAct, na.rm = TRUE),    #median
+    sum_ConnOtAct  = sum(ConnOtAct, na.rm = TRUE),   # sum
+    min_ConnOtAct  = min(ConnOtAct, na.rm = TRUE),    # minimum value
+    max_ConnOtAct  = max(ConnOtAct, na.rm = TRUE)    # maximum value
+  )
+    
+
+wiompa_connect_summary<- as.data.frame(wiompa_connect_summary)
+wiompa_connect_means<-wiompa_connect_summary %>% select(starts_with("mean_"))
+wiompa_connect_means$ROW_ID<-buf_wiompas$ROW_ID
 
 ###~~~critical habitat and coral reef fish summaries
 
@@ -88,6 +137,7 @@ coral_reef_summary<- coral_reef_summary %>%  filter(vars=="2") %>% rename_with(~
 
 coral_reef_summary<- coral_reef_summary [,-c(1:3)]
 
+str(coral_reef_summary)
 
 coral_reef_mean<- coral_reef_summary [,2]
 
@@ -319,6 +369,42 @@ thetao_summary<- thetao_summary [,-c(1:3)]
 thetao_mean<- thetao_summary [,2]
 
 ###~~~ Human pressure summaries
+
+###~~~ connectivity matrix summaries for resident and cryptobenthic spawners
+
+
+travel_time_transformed<- st_transform(travel_time, crs(wiompas)) # streamline projections
+travel_time_transformed<- st_crop(travel_time_transformed, wio_bbox) # crop to wio region
+
+
+travel_time_summary<- st_join(buf_wiompas, travel_time_transformed)
+
+
+travel_time_summary <- travel_time_summary %>%
+  st_drop_geometry() %>%
+  group_by(ROW_ID) %>%
+  summarise(
+    polygon_count = n(),
+    mean_TT_pop = mean(TT_pop, na.rm = TRUE), # mean
+    sd_TT_pop   = sd(TT_pop, na.rm = TRUE),    # standard deviation
+    se_TT_pop   = se(TT_pop, na.rm = TRUE),    # standard error
+    med_TT_pop   = median(TT_pop, na.rm = TRUE),    #median
+    sum_TT_pop  = sum(TT_pop, na.rm = TRUE),   # sum
+    min_TT_pop  = min(TT_pop, na.rm = TRUE),    # minimum value
+    max_TT_pop  = max(TT_pop, na.rm = TRUE),    # maximum value
+    mean_TT_market = mean(TT_market, na.rm = TRUE), # mean
+    sd_TT_market   = sd(TT_market, na.rm = TRUE),    # standard deviation
+    se_TT_market   = se(TT_market, na.rm = TRUE),    # standard error
+    med_TT_market   = median(TT_market, na.rm = TRUE),    #median
+    sum_TT_market  = sum(TT_market, na.rm = TRUE),   # sum
+    min_TT_market  = min(TT_market, na.rm = TRUE),    # minimum value
+    max_TT_market  = max(TT_market, na.rm = TRUE)    # maximum value
+)
+
+
+travel_time_summary<- as.data.frame(travel_time_summary)
+travel_time_means<-travel_time_summary %>% select(starts_with("mean_"))
+travel_time_means$ROW_ID<-buf_wiompas$ROW_ID
 
 ######~~~~~ gravity
 gravity_projected<- project(gravity, crs(wiompas))
@@ -790,11 +876,39 @@ write.csv(wiompas_df_var_means,"wiompas_df_var_means.csv")
 # Bind internal and contextual enabling conditions to polygon and variable mean data frame
 
 wiompas_cond <- read_csv("wiompa_internal_contextual_conditions.csv")
-wiompas_cond_2 <- wiompas_cond [,-c(79:84,86:92,94:100,102:108,110:116,118:124)]
-wiompas_df_var_means_cond <- left_join(wiompas_df_var_means, wiompas_cond_2, by = "ID")
+wiompas_cond_2 <- wiompas_cond [,-c(2:5,55,80:85,87:93,95:101,103:109,111:117,119:125)]
+wiompas_df_var_means_2 <- wiompas_df_var_means [,-c(14)]
+wiompas_df_var_means_cond <- left_join(wiompas_df_var_means_2, wiompas_cond_2, by = "ID")
+
+#wiompas_cond[125]
+
+wiompas_df_var_means_cond_conn<- left_join(wiompas_df_var_means_cond, wiompa_connect_means, by = "ROW_ID")
+
+wiompas_df_var_means_cond_conn_TT<- left_join(wiompas_df_var_means_cond_conn, travel_time_means, by = "ROW_ID")
+
+# Update year of establishment for Parc National Mitsamiouli Ndroude from UNEP-WCMC (2026). Protected Area Profile for Parc National Mitsamiouli Ndroude from the World Database on Protected Areas, November 2026. Available at: www.protectedplanet.net
+wiompas_df_var_means_cond_conn_TT <- wiompas_df_var_means_cond_conn_TT%>% 
+  mutate(YEAR = ifelse(YEAR=="Not available", 2010, YEAR))
+
+wiompas_df_var_means_cond_conn_TT<- wiompas_df_var_means_cond_conn_TT %>% 
+  mutate(YEAR = 2018 - YEAR)  %>% rename(AGE=YEAR)
 
 # Save and inspect full matrix
-write.csv(wiompas_df_var_means_cond,"wiompas_df_var_means_cond.csv")
+write_csv(wiompas_df_var_means_cond_conn_TT,"wiompas_df_var_means_cond_conn_TT.csv")
 
 
+# SUbset matrix in preparation for PCA analysis
 
+wio_mpa_df<- wiompas_df_var_means_cond_conn_TT [,-c(1:3,6:10,12:15,17:21,24,75:88,134:137)]
+
+swio_mpa_df<- wiompas_df_var_means_cond_conn_TT [,-c(1:3,6:10,12:15,17:21,24,75:88,134:137,139:143)]
+
+#wiompas_df_var_means_cond_conn_TT[3]
+
+wio_mpas_matrix <- na.omit(wio_mpa_df)
+
+swio_mpas_matrix <- na.omit(swio_mpa_df)
+
+# Save and inspect matrix subsets 
+write_csv(wio_mpas_matrix,"wio_mpas_matrix.csv")
+write_csv(swio_mpas_matrix,"swio_mpas_matrix.csv")
