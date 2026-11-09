@@ -1,0 +1,105 @@
+case,n_miss,pct_miss,MPA_NAME,COUNTRY
+26,39,27.857142857142858,Prince Edward Island,South Africa
+15,16,11.428571428571429,Mananara Nord,Madagascar
+6,15,10.714285714285714,Parc National Coelacanthe,Comoros
+7,15,10.714285714285714,Parc National Mitsamiouli-Ndroude,Comoros
+8,15,10.714285714285714,Parc National Shisiwani,Comoros
+48,15,10.714285714285714,Pomene,Mozambique
+2,14,10,Watamu National Park,Kenya
+3,14,10,Malindi  National Park,Kenya
+12,14,10,Velondriake,Madagascar
+90,13,9.285714285714286,Ambodivahibe,Madagascar
+62,6,4.285714285714286,Malgas Island,South Africa
+63,6,4.285714285714286,Jutten Island,South Africa
+64,6,4.285714285714286,Langebaan Lagoon,South Africa
+65,6,4.285714285714286,Sixteen Mile Beach,South Africa
+66,6,4.285714285714286,Table Mountain National Park,South Africa
+67,6,4.285714285714286,Helderberg,South Africa
+71,6,4.285714285714286,Sardinia Bay,South Africa
+73,6,4.285714285714286,Hluleka,South Africa
+76,6,4.285714285714286,Marcus Island,South Africa
+79,6,4.285714285714286,RocherPan,South Africa
+21,5,3.571428571428571,Marromeu,Mozambique
+68,5,3.571428571428571,De Hoop,South Africa
+69,5,3.571428571428571,Goukamma,South Africa
+70,5,3.571428571428571,Robberg,South Africa
+72,5,3.571428571428571,Dwesa-Cwebe,South Africa
+74,5,3.571428571428571,Trafalgar,South Africa
+75,5,3.571428571428571,Pondoland,South Africa
+77,5,3.571428571428571,Stilbaai,South Africa
+78,5,3.571428571428571,Amathole,South Africa
+80,5,3.571428571428571,Aliwal Shoal,South Africa
+100,5,3.571428571428571,Betty's Bay,South Africa
+101,5,3.571428571428571,Tsitsikamma,South Africa
+4,3,2.142857142857143,Kiunga Marine National Reserve,Kenya
+18,3,2.142857142857143,Nosy Mangabe,Madagascar
+13,2,1.4285714285714286,Kirindy Mite,Madagascar
+85,2,1.4285714285714286,Baie Ternay Marine National Park,Seychelles
+88,2,1.4285714285714286,Aldabra Special Reserve,Seychelles
+92,2,1.4285714285714286,Ankivonjy,Madagascar
+1,1,0.7142857142857143,Mombasa Marine Park,Kenya
+9,1,0.7142857142857143,"Parc National de Moheli (Moheli National Park)
+",Comoros
+50,1,0.7142857142857143,Grand Port Zone A,Mauritius
+81,1,0.7142857142857143,Silhouette,Seychelles
+82,1,0.7142857142857143,Ste. Anne,Seychelles
+83,1,0.7142857142857143,Cousin Special Reserve,Seychelles
+84,1,0.7142857142857143,"Ile Cocos, Ile La Fouche, Ilot Platte",Seychelles
+86,1,0.7142857142857143,African Banks Marine,Seychelles
+87,1,0.7142857142857143,Aride Island,Seychelles
+91,1,0.7142857142857143,Nosy Tanihely,Madagascar
+102,1,0.7142857142857143,Port  Launay,Seychelles
+103,1,0.7142857142857143,Curieuse,Seychelles
+5,0,0,Kisite-Mpunguti Marine Park,Kenya
+10,0,0,Soariake,Madagascar
+11,0,0,Ankarea,Madagascar
+14,0,0,Lokobe,Madagascar
+16,0,0,Masoala,Madagascar
+17,0,0,Nosy Hara,Madagascar
+19,0,0,Nosy Ve Androka,Madagascar
+20,0,0,Sahamalaza Iles Radama,Madagascar
+22,0,0,Bazaruto Archipelago,Mozambique
+23,0,0,Cabo Sao Sebastiao,Mozambique
+24,0,0,Ponta do Ouro,Mozambique
+25,0,0,Primeiras and Segundas,Mozambique
+27,0,0,Kirui Island,Tanzania
+28,0,0,Mafia Island,Tanzania
+29,0,0,Nyororo Island,Tanzania
+30,0,0,Mbarakuni Island,Tanzania
+31,0,0,Mnazi Bay-Ruvuma Estuary,Tanzania
+32,0,0,Tanga Coelacanth Marine Park (TACMP),Tanzania
+33,0,0,Ulenge Island,Tanzania
+34,0,0,Kwale Island,Tanzania
+35,0,0,Mwewe Island,Tanzania
+36,0,0,Bongoyo Island,Tanzania
+37,0,0,Pangavini Island,Tanzania
+38,0,0,Mbudya Island,Tanzania
+39,0,0,Kendwa Island,Tanzania
+40,0,0,Makatube Island,Tanzania
+41,0,0,Sinda Island,Tanzania
+42,0,0,Maziwe Island,Tanzania
+43,0,0,Pemba Channel,Tanzania
+44,0,0,Menai Bay Conservation Area,Tanzania
+45,0,0,Tumbatu,Tanzania
+46,0,0,Ngezi-Vumawimbi,Tanzania
+47,0,0,Chumbe Island Coral Park/ Sanctuary,Tanzania
+49,0,0,Black river,Mauritius
+51,0,0,Blue Bay,Mauritius
+52,0,0,Balaclava,Mauritius
+53,0,0,Port Louis,Mauritius
+54,0,0,Passe Demie,Mauritius
+55,0,0,Grand Bassin,Mauritius
+56,0,0,Anse aux Anglais,Mauritius
+57,0,0,Riviere Banane,Mauritius
+58,0,0,South East Marine Protected Area (SEMPA),Mauritius
+59,0,0,Natural Reserve of Mbouzi,France
+60,0,0,Natural Marine Reserve of Reunion Island,France
+61,0,0,Mayotte,France
+89,0,0,Kiwengwa Controlled Area (KCA),Tanzania
+93,0,0,Fungu-Yasin,Tanzania
+94,0,0,Shungumbili,Tanzania
+95,0,0,Quirimbas,Mozambique
+96,0,0,Changuu-Bawe,Tanzania
+97,0,0,Trou d' Eau Douce,Mauritius
+98,0,0,Poste La Fayette,Mauritius
+99,0,0,Poudre d' Or,Mauritius

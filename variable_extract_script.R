@@ -4,11 +4,16 @@ library(readr)
 library(dplyr)
 library(tidyverse)
 library(psych)
+library(naniar)
+
 rm(list=ls())
 
 # Load MPA and land polygons
 wiompas <- st_read("/Users/48483117/OneDrive - Macquarie University/Documents/wiompas_fin.shp")
-wiompas$ROW_ID <- seq_len(nrow(wiompas))#  add an ID column
+
+wiompa_df <- wiompas %>%
+  st_drop_geometry()
+#wiompas$ID <- seq_len(nrow(wiompas))#  add an ID column
 land<-st_read("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/chapter_3_governance effectiveness at different scales in the SWIO/data/gis/S2Coast_2023.shp")
 
 land_transform<-st_transform(land, st_crs(wiompas_v)) # streamline projections
@@ -20,6 +25,8 @@ coral_reef<-rast("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/cha
 seagrass_bed<-rast("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/Chapter_3_governance effectiveness at different scales in the SWIO/data/wiosym/eco/seagrass_bed.tif")
 mangrove<-rast("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/Chapter_3_governance effectiveness at different scales in the SWIO/data/wiosym/eco/mangrove.tif")
 coral_reef_fish<-rast("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/Chapter_3_governance effectiveness at different scales in the SWIO/data/wiosym/eco/coral_reef_fish.tif")
+sharks<-rast("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/Chapter_3_governance effectiveness at different scales in the SWIO/data/wiosym/eco/sharks.tif")
+
 
 #Load connectivity data 
 wiompa_connect <- st_read("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/chapter_3_governance effectiveness at different scales in the SWIO/data/gis/Global_connectivity_active_connectance_shapefile/Global_connectivity_active_connectance.shp")
@@ -34,7 +41,9 @@ so <- rast("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/
 thetao <- rast("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/chapter_3_governance effectiveness at different scales in the SWIO/data/environmental/thetao_baseline_2000_2019_depthsurf_74ff_39fa_9adc_U1791756072928.nc")
 
 # Load human pressures
+pop_dens<-rast("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/Chapter_3_governance effectiveness at different scales in the SWIO/data/gpw-v4-population-density-adjusted-to-2015-unwpp-country-totals-rev11_2015_30_sec_tif/gpw_v4_population_density_adjusted_to_2015_unwpp_country_totals_rev11_2015_30_sec.tif")
 travel_time<-st_read("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/Chapter_3_governance effectiveness at different scales in the SWIO/data/gis/Gravity/Global Gravity of Coral Reefs 2.0.shp")
+rdi<-rast("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/Chapter_3_governance effectiveness at different scales in the SWIO/data/povmap-grdi-v1-geotiff/povmap-grdi-v1.tif")
 gravity<-rast("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/Chapter_3_governance effectiveness at different scales in the SWIO/data/gis/wio_gravity_of_markets_maina/wio_gravity_of_markets_maina/logGRAV_WIO_7k.tif")
 artisanal_fishing<-rast("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/Chapter_3_governance effectiveness at different scales in the SWIO/data/wiosym/pres/artisanal_fishing.tif")
 coastal_tourism<-rast("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/Chapter_3_governance effectiveness at different scales in the SWIO/data/wiosym/pres/coastal_tourism.tif")
@@ -55,7 +64,7 @@ sea_level_rise<-rast("/Users/48483117/OneDrive - Macquarie University/Remy's PhD
 temperature_rise<-rast("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/Chapter_3_governance effectiveness at different scales in the SWIO/data/wiosym/pres/temperature_rise.tif")
 weighted_longline<-rast("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/Chapter_3_governance effectiveness at different scales in the SWIO/data/wiosym/pres/weighted_longline.tif")
 
-#se function
+#se gravity#se function
 se <- function(x, na.rm = FALSE) {
   if (na.rm) x <- x[!is.na(x)]
   sd(x) / sqrt(length(x))
@@ -112,7 +121,6 @@ wiompa_connect_summary <- wiompa_connect_joined %>%
 
 wiompa_connect_summary<- as.data.frame(wiompa_connect_summary)
 wiompa_connect_means<-wiompa_connect_summary %>% select(starts_with("mean_"))
-wiompa_connect_means$ROW_ID<-buf_wiompas$ROW_ID
 
 ###~~~critical habitat and coral reef fish summaries
 
@@ -131,7 +139,7 @@ extract_coral_reef[extract_coral_reef == -9999.900390625] <- NA
 
 # Calculate summary statistics by MPA (row ID)
 
-coral_reef_summary <- describeBy(extract_coral_reef,extract_coral_reef$ROW_ID, mat = T)
+coral_reef_summary <- describeBy(extract_coral_reef,extract_coral_reef$ID, mat = T)
 
 coral_reef_summary<- coral_reef_summary %>%  filter(vars=="2") %>% rename_with(~ paste0("coral_reef_", .x)) %>% remove_rownames()
 
@@ -156,7 +164,7 @@ extract_seagrass_bed[extract_seagrass_bed == -9999.900390625] <- NA
 
 # Calculate summary statistics by MPA (row ID)
 
-seagrass_bed_summary <- describeBy(extract_seagrass_bed,extract_seagrass_bed$ROW_ID, mat = T)
+seagrass_bed_summary <- describeBy(extract_seagrass_bed,extract_seagrass_bed$ID, mat = T)
 
 seagrass_bed_summary<- seagrass_bed_summary %>%  filter(vars=="2") %>% rename_with(~ paste0("seagrass_bed_", .x)) %>% remove_rownames()
 
@@ -180,7 +188,7 @@ extract_mangrove[extract_mangrove == -9999.900390625] <- NA
 
 # Calculate summary statistics by MPA (row ID)
 
-mangrove_summary <- describeBy(extract_mangrove,extract_mangrove$ROW_ID, mat = T)
+mangrove_summary <- describeBy(extract_mangrove,extract_mangrove$ID, mat = T)
 
 mangrove_summary<- mangrove_summary %>%  filter(vars=="2") %>% rename_with(~ paste0("mangrove_", .x)) %>% remove_rownames()
 
@@ -203,13 +211,36 @@ extract_coral_reef_fish[extract_coral_reef_fish == -9999.900390625] <- NA
 
 # Calculate summary statistics by MPA (row ID)
 
-coral_reef_fish_summary <- describeBy(extract_coral_reef_fish,extract_coral_reef_fish$ROW_ID, mat = T)
+coral_reef_fish_summary <- describeBy(extract_coral_reef_fish,extract_coral_reef_fish$ID, mat = T)
 
 coral_reef_fish_summary<- coral_reef_fish_summary %>%  filter(vars=="2") %>% rename_with(~ paste0("coral_reef_fish_", .x)) %>% remove_rownames()
 
 coral_reef_fish_summary<- coral_reef_fish_summary [,-c(1:3)]
 
 coral_reef_fish_mean<- coral_reef_fish_summary [,2]
+
+######~~~~~ sharks
+
+sharks_projected<- project(sharks, crs(wiompas)) # streamline projections
+sharks_projected<- crop(sharks_projected, wio_bbox) # crop to wio region
+
+#Apply mask setting cells on land to NAs
+sharks_masked <- mask(sharks_projected, land_transform, inverse=TRUE)
+
+# Extract or crop/mask raster values within the buffer
+# Using terra::extract() with extract polygons
+extract_sharks <- terra::extract(sharks_masked, vect(buf_wiompas))
+extract_sharks[extract_sharks == -9999.900390625] <- NA 
+
+# Calculate summary statistics by MPA (row ID)
+
+sharks_summary <- describeBy(extract_sharks,extract_sharks$ID, mat = T)
+
+sharks_summary<- sharks_summary %>%  filter(vars=="2") %>% rename_with(~ paste0("sharks_", .x)) %>% remove_rownames()
+
+sharks_summary<- sharks_summary [,-c(1:3)]
+
+sharks_mean<- sharks_summary [,2]
 
 ###~~~ Environmental factor summaries
 
@@ -228,7 +259,7 @@ chl_masked <- mask(chl_projected, land_transform, inverse=TRUE)
 
   # Calculate summary statistics by MPA (row ID)
   
-  chl_summary <- describeBy(extract_chl,extract_chl$ROW_ID, mat = T)
+  chl_summary <- describeBy(extract_chl,extract_chl$ID, mat = T)
   
   chl_summary<- chl_summary %>%  filter(vars=="2") %>% rename_with(~ paste0("chl_", .x)) %>% remove_rownames()
   
@@ -258,7 +289,7 @@ extract_no3[extract_no3 == -9999.900390625] <- NA
 
 # Calculate summary statistics by MPA (row ID)
 
-no3_summary <- describeBy(extract_no3,extract_no3$ROW_ID, mat = T)
+no3_summary <- describeBy(extract_no3,extract_no3$ID, mat = T)
 
 no3_summary<- no3_summary %>%  filter(vars=="2") %>% rename_with(~ paste0("no3_", .x)) %>% remove_rownames()
 
@@ -284,7 +315,7 @@ extract_o2[extract_o2 == -9999.900390625] <- NA
 
 # Calculate summary statistics by MPA (row ID)
 
-o2_summary <- describeBy(extract_o2,extract_o2$ROW_ID, mat = T)
+o2_summary <- describeBy(extract_o2,extract_o2$ID, mat = T)
 
 o2_summary<- o2_summary %>%  filter(vars=="2") %>% rename_with(~ paste0("o2_", .x)) %>% remove_rownames()
 
@@ -309,7 +340,7 @@ extract_phyc[extract_phyc == -9999.900390625] <- NA
 
 # Calculate summary statistics by MPA (row ID)
 
-phyc_summary <- describeBy(extract_phyc,extract_phyc$ROW_ID, mat = T)
+phyc_summary <- describeBy(extract_phyc,extract_phyc$ID, mat = T)
 
 phyc_summary<- phyc_summary %>%  filter(vars=="2") %>% rename_with(~ paste0("phyc_", .x)) %>% remove_rownames()
 
@@ -334,7 +365,7 @@ extract_so[extract_so == -9999.900390625] <- NA
 
 # Calculate summary statistics by MPA (row ID)
 
-so_summary <- describeBy(extract_so,extract_so$ROW_ID, mat = T)
+so_summary <- describeBy(extract_so,extract_so$ID, mat = T)
 
 so_summary<- so_summary %>%  filter(vars=="2") %>% rename_with(~ paste0("so_", .x)) %>% remove_rownames()
 
@@ -360,7 +391,7 @@ extract_thetao[extract_thetao == -9999.900390625] <- NA
 
 # Calculate summary statistics by MPA (row ID)
 
-thetao_summary <- describeBy(extract_thetao,extract_thetao$ROW_ID, mat = T)
+thetao_summary <- describeBy(extract_thetao,extract_thetao$ID, mat = T)
 
 thetao_summary<- thetao_summary %>%  filter(vars=="2") %>% rename_with(~ paste0("thetao_", .x)) %>% remove_rownames()
 
@@ -370,8 +401,32 @@ thetao_mean<- thetao_summary [,2]
 
 ###~~~ Human pressure summaries
 
-###~~~ connectivity matrix summaries for resident and cryptobenthic spawners
+######~~~~~ pop_dens (gpw_v4_population_density_adjusted_to_2015_unwpp_country_totals_rev11_2015_30_sec)
+pop_dens_projected<- project(pop_dens, crs(wiompas))
+pop_dens_projected<- crop(pop_dens_projected, wio_bbox)
 
+#crs(land_transform)
+
+#Apply mask setting cells on land to NAs
+#pop_dens_masked <- mask(pop_dens_projected, land_transform, inverse=TRUE)
+
+# Extract or crop/mask raster values within the buffer
+# Using terra::extract() with extract polygons
+extract_pop_dens <- terra::extract(pop_dens_projected, vect(buf_wiompas))
+extract_pop_dens[extract_pop_dens == -9999.900390625] <- NA 
+
+# Calculate summary statistics by MPA (row ID)
+
+pop_dens_summary <- describeBy(extract_pop_dens,extract_pop_dens$ID, mat = T)
+
+pop_dens_summary<- pop_dens_summary %>%  filter(vars=="2") %>% rename_with(~ paste0("pop_dens_", .x)) %>% remove_rownames()
+
+pop_dens_summary<- pop_dens_summary [,-c(1:3)]
+
+pop_dens_mean<- pop_dens_summary [,2]
+
+
+###~~~ travel time to nearest population and market
 
 travel_time_transformed<- st_transform(travel_time, crs(wiompas)) # streamline projections
 travel_time_transformed<- st_crop(travel_time_transformed, wio_bbox) # crop to wio region
@@ -404,7 +459,7 @@ travel_time_summary <- travel_time_summary %>%
 
 travel_time_summary<- as.data.frame(travel_time_summary)
 travel_time_means<-travel_time_summary %>% select(starts_with("mean_"))
-travel_time_means$ROW_ID<-buf_wiompas$ROW_ID
+
 
 ######~~~~~ gravity
 gravity_projected<- project(gravity, crs(wiompas))
@@ -423,13 +478,39 @@ extract_gravity[extract_gravity == -9999.900390625] <- NA
 
 # Calculate summary statistics by MPA (row ID)
 
-gravity_summary <- describeBy(extract_gravity,extract_gravity$ROW_ID, mat = T)
+gravity_summary <- describeBy(extract_gravity,extract_gravity$ID, mat = T)
 
 gravity_summary<- gravity_summary %>%  filter(vars=="2") %>% rename_with(~ paste0("gravity_", .x)) %>% remove_rownames()
 
 gravity_summary<- gravity_summary [,-c(1:3)]
 
 gravity_mean<- gravity_summary [,2]
+
+######~~~~~ relative deprivation index (RDI)
+rdi_projected<- project(rdi, crs(wiompas))
+rdi_projected<- crop(rdi_projected, wio_bbox)
+
+#crs(land_transform)
+
+#Apply mask setting cells on land to NAs
+#rdi_masked <- mask(rdi_projected, land_transform, inverse=TRUE)
+
+# Extract or crop/mask raster values within the buffer
+# Using terra::extract() with extract polygons
+extract_rdi <- terra::extract(rdi_projected, vect(buf_wiompas))
+extract_rdi[extract_rdi == -9999.900390625] <- NA 
+
+
+# Calculate summary statistics by MPA (row ID)
+
+rdi_summary <- describeBy(extract_rdi,extract_rdi$ID, mat = T)
+
+rdi_summary<- rdi_summary %>%  filter(vars=="2") %>% rename_with(~ paste0("rdi_", .x)) %>% remove_rownames()
+
+rdi_summary<- rdi_summary [,-c(1:3)]
+
+rdi_mean<- rdi_summary [,2]
+
 
 ######~~~~~ artisanal_fishing
 artisanal_fishing_projected<- project(artisanal_fishing, crs(wiompas))
@@ -446,7 +527,7 @@ extract_artisanal_fishing[extract_artisanal_fishing == -9999.900390625] <- NA
 
 # Calculate summary statistics by MPA (row ID)
 
-artisanal_fishing_summary <- describeBy(extract_artisanal_fishing,extract_artisanal_fishing$ROW_ID, mat = T)
+artisanal_fishing_summary <- describeBy(extract_artisanal_fishing,extract_artisanal_fishing$ID, mat = T)
 
 artisanal_fishing_summary<- artisanal_fishing_summary %>%  filter(vars=="2") %>% rename_with(~ paste0("artisanal_fishing_", .x)) %>% remove_rownames()
 
@@ -469,7 +550,7 @@ extract_coastal_tourism[extract_coastal_tourism == -9999.900390625] <- NA
 
 # Calculate summary statistics by MPA (row ID)
 
-coastal_tourism_summary <- describeBy(extract_coastal_tourism,extract_coastal_tourism$ROW_ID, mat = T)
+coastal_tourism_summary <- describeBy(extract_coastal_tourism,extract_coastal_tourism$ID, mat = T)
 
 coastal_tourism_summary<- coastal_tourism_summary %>%  filter(vars=="2") %>% rename_with(~ paste0("coastal_tourism_", .x)) %>% remove_rownames()
 
@@ -492,7 +573,7 @@ extract_demersal_gillnet[extract_demersal_gillnet == -9999.900390625] <- NA
 
 # Calculate summary statistics by MPA (row ID)
 
-demersal_gillnet_summary <- describeBy(extract_demersal_gillnet,extract_demersal_gillnet$ROW_ID, mat = T)
+demersal_gillnet_summary <- describeBy(extract_demersal_gillnet,extract_demersal_gillnet$ID, mat = T)
 
 demersal_gillnet_summary<- demersal_gillnet_summary %>%  filter(vars=="2") %>% rename_with(~ paste0("demersal_gillnet_", .x)) %>% remove_rownames()
 
@@ -515,7 +596,7 @@ extract_demersal_trawl[extract_demersal_trawl == -9999.900390625] <- NA
 
 # Calculate summary statistics by MPA (row ID)
 
-demersal_trawl_summary <- describeBy(extract_demersal_trawl,extract_demersal_trawl$ROW_ID, mat = T)
+demersal_trawl_summary <- describeBy(extract_demersal_trawl,extract_demersal_trawl$ID, mat = T)
 
 demersal_trawl_summary<- demersal_trawl_summary %>%  filter(vars=="2") %>% rename_with(~ paste0("demersal_trawl_", .x)) %>% remove_rownames()
 
@@ -538,7 +619,7 @@ extract_dredging[extract_dredging == -9999.900390625] <- NA
 
 # Calculate summary statistics by MPA (row ID)
 
-dredging_summary <- describeBy(extract_dredging,extract_dredging$ROW_ID, mat = T)
+dredging_summary <- describeBy(extract_dredging,extract_dredging$ID, mat = T)
 
 dredging_summary<- dredging_summary %>%  filter(vars=="2") %>% rename_with(~ paste0("dredging_", .x)) %>% remove_rownames()
 
@@ -561,7 +642,7 @@ extract_dumping[extract_dumping == -9999.900390625] <- NA
 
 # Calculate summary statistics by MPA (row ID)
 
-dumping_summary <- describeBy(extract_dumping,extract_dumping$ROW_ID, mat = T)
+dumping_summary <- describeBy(extract_dumping,extract_dumping$ID, mat = T)
 
 dumping_summary<- dumping_summary %>%  filter(vars=="2") %>% rename_with(~ paste0("dumping_", .x)) %>% remove_rownames()
 
@@ -584,7 +665,7 @@ extract_floating_longline[extract_floating_longline == -9999.900390625] <- NA
 
 # Calculate summary statistics by MPA (row ID)
 
-floating_longline_summary <- describeBy(extract_floating_longline,extract_floating_longline$ROW_ID, mat = T)
+floating_longline_summary <- describeBy(extract_floating_longline,extract_floating_longline$ID, mat = T)
 
 floating_longline_summary<- floating_longline_summary %>%  filter(vars=="2") %>% rename_with(~ paste0("floating_longline_", .x)) %>% remove_rownames()
 
@@ -607,7 +688,7 @@ extract_industrial_pollution[extract_industrial_pollution == -9999.900390625] <-
 
 # Calculate summary statistics by MPA (row ID)
 
-industrial_pollution_summary <- describeBy(extract_industrial_pollution,extract_industrial_pollution$ROW_ID, mat = T)
+industrial_pollution_summary <- describeBy(extract_industrial_pollution,extract_industrial_pollution$ID, mat = T)
 
 industrial_pollution_summary<- industrial_pollution_summary %>%  filter(vars=="2") %>% rename_with(~ paste0("industrial_pollution_", .x)) %>% remove_rownames()
 
@@ -630,7 +711,7 @@ extract_nutrient_input[extract_nutrient_input == -9999.900390625] <- NA
 
 # Calculate summary statistics by MPA (row ID)
 
-nutrient_input_summary <- describeBy(extract_nutrient_input,extract_nutrient_input$ROW_ID, mat = T)
+nutrient_input_summary <- describeBy(extract_nutrient_input,extract_nutrient_input$ID, mat = T)
 
 nutrient_input_summary<- nutrient_input_summary %>%  filter(vars=="2") %>% rename_with(~ paste0("nutrient_input_", .x)) %>% remove_rownames()
 
@@ -653,7 +734,7 @@ extract_ocean_acidification[extract_ocean_acidification == -9999.900390625] <- N
 
 # Calculate summary statistics by MPA (row ID)
 
-ocean_acidification_summary <- describeBy(extract_ocean_acidification,extract_ocean_acidification$ROW_ID, mat = T)
+ocean_acidification_summary <- describeBy(extract_ocean_acidification,extract_ocean_acidification$ID, mat = T)
 
 ocean_acidification_summary<- ocean_acidification_summary %>%  filter(vars=="2") %>% rename_with(~ paste0("ocean_acidification_", .x)) %>% remove_rownames()
 
@@ -676,7 +757,7 @@ extract_oil_gas_industry[extract_oil_gas_industry == -9999.900390625] <- NA
 
 # Calculate summary statistics by MPA (row ID)
 
-oil_gas_industry_summary <- describeBy(extract_oil_gas_industry,extract_oil_gas_industry$ROW_ID, mat = T)
+oil_gas_industry_summary <- describeBy(extract_oil_gas_industry,extract_oil_gas_industry$ID, mat = T)
 
 oil_gas_industry_summary<- oil_gas_industry_summary %>%  filter(vars=="2") %>% rename_with(~ paste0("oil_gas_industry_", .x)) %>% remove_rownames()
 
@@ -699,7 +780,7 @@ extract_pelagic_seine[extract_pelagic_seine == -9999.900390625] <- NA
 
 # Calculate summary statistics by MPA (row ID)
 
-pelagic_seine_summary <- describeBy(extract_pelagic_seine,extract_pelagic_seine$ROW_ID, mat = T)
+pelagic_seine_summary <- describeBy(extract_pelagic_seine,extract_pelagic_seine$ID, mat = T)
 
 pelagic_seine_summary<- pelagic_seine_summary %>%  filter(vars=="2") %>% rename_with(~ paste0("pelagic_seine_", .x)) %>% remove_rownames()
 
@@ -722,7 +803,7 @@ extract_piers_and_docks[extract_piers_and_docks == -9999.900390625] <- NA
 
 # Calculate summary statistics by MPA (row ID)
 
-piers_and_docks_summary <- describeBy(extract_piers_and_docks,extract_piers_and_docks$ROW_ID, mat = T)
+piers_and_docks_summary <- describeBy(extract_piers_and_docks,extract_piers_and_docks$ID, mat = T)
 
 piers_and_docks_summary<- piers_and_docks_summary %>%  filter(vars=="2") %>% rename_with(~ paste0("piers_and_docks_", .x)) %>% remove_rownames()
 
@@ -746,7 +827,7 @@ extract_plastic_litter[extract_plastic_litter == -9999.900390625] <- NA
 
 # Calculate summary statistics by MPA (row ID)
 
-plastic_litter_summary <- describeBy(extract_plastic_litter,extract_plastic_litter$ROW_ID, mat = T)
+plastic_litter_summary <- describeBy(extract_plastic_litter,extract_plastic_litter$ID, mat = T)
 
 plastic_litter_summary<- plastic_litter_summary %>%  filter(vars=="2") %>% rename_with(~ paste0("plastic_litter_", .x)) %>% remove_rownames()
 
@@ -769,7 +850,7 @@ extract_ports[extract_ports == -9999.900390625] <- NA
 
 # Calculate summary statistics by MPA (row ID)
 
-ports_summary <- describeBy(extract_ports,extract_ports$ROW_ID, mat = T)
+ports_summary <- describeBy(extract_ports,extract_ports$ID, mat = T)
 
 ports_summary<- ports_summary %>%  filter(vars=="2") %>% rename_with(~ paste0("ports_", .x)) %>% remove_rownames()
 
@@ -792,7 +873,7 @@ extract_sea_level_rise[extract_sea_level_rise == -9999.900390625] <- NA
 
 # Calculate summary statistics by MPA (row ID)
 
-sea_level_rise_summary <- describeBy(extract_sea_level_rise,extract_sea_level_rise$ROW_ID, mat = T)
+sea_level_rise_summary <- describeBy(extract_sea_level_rise,extract_sea_level_rise$ID, mat = T)
 
 sea_level_rise_summary<- sea_level_rise_summary %>%  filter(vars=="2") %>% rename_with(~ paste0("sea_level_rise_", .x)) %>% remove_rownames()
 
@@ -815,7 +896,7 @@ extract_temperature_rise[extract_temperature_rise == -9999.900390625] <- NA
 
 # Calculate summary statistics by MPA (row ID)
 
-temperature_rise_summary <- describeBy(extract_temperature_rise,extract_temperature_rise$ROW_ID, mat = T)
+temperature_rise_summary <- describeBy(extract_temperature_rise,extract_temperature_rise$ID, mat = T)
 
 temperature_rise_summary<- temperature_rise_summary %>%  filter(vars=="2") %>% rename_with(~ paste0("temperature_rise_", .x)) %>% remove_rownames()
 
@@ -838,7 +919,7 @@ extract_weighted_longline[extract_weighted_longline == -9999.900390625] <- NA
 
 # Calculate summary statistics by MPA (row ID)
 
-weighted_longline_summary <- describeBy(extract_weighted_longline,extract_weighted_longline$ROW_ID, mat = T)
+weighted_longline_summary <- describeBy(extract_weighted_longline,extract_weighted_longline$ID, mat = T)
 
 weighted_longline_summary<- weighted_longline_summary %>%  filter(vars=="2") %>% rename_with(~ paste0("weighted_longline_", .x)) %>% remove_rownames()
 
@@ -849,8 +930,8 @@ weighted_longline_mean<-weighted_longline_summary [,2]
 # Bind variable summaries to polygon attributes
 
 
-wiompas_df_var_summaries<- cbind(wiompas_df,coral_reef_summary,seagrass_bed_summary,mangrove_summary,coral_reef_fish_summary,  
-                       chl_summary,no3_summary,o2_summary,phyc_summary,so_summary,thetao_summary,
+wiompas_df_var_summaries<- cbind(wiompas_df,coral_reef_summary,seagrass_bed_summary,mangrove_summary,coral_reef_fish_summary,wiompa_connect_summary, sharks_summary,  
+                       chl_summary,no3_summary,o2_summary,phyc_summary,so_summary,thetao_summary,rdi_summary,pop_dens_summary,travel_time_summary,
                        gravity_summary,artisanal_fishing_summary,coastal_tourism_summary,demersal_gillnet_summary,
                        demersal_trawl_summary,dredging_summary,dumping_summary, floating_longline_summary,
                        industrial_pollution_summary,nutrient_input_summary,ocean_acidification_summary,oil_gas_industry_summary,
@@ -858,12 +939,13 @@ wiompas_df_var_summaries<- cbind(wiompas_df,coral_reef_summary,seagrass_bed_summ
                        temperature_rise_summary, temperature_rise_summary, weighted_longline_summary)
 
 # Save and inspect summaries
+wiompas_df_var_summaries<-as.data.frame(wiompas_df_var_summaries)
 write.csv(wiompas_df_var_summaries,"wiompas_df_var_summaries.csv")
 
 # Bind variable means to polygon attributes
 
-wiompas_df_var_means<- cbind(wiompas_df,coral_reef_mean,seagrass_bed_mean,mangrove_mean,coral_reef_fish_mean,  
-                                 chl_mean,no3_mean,o2_mean,phyc_mean,so_mean,thetao_mean,
+wiompas_df_var_means<- cbind(wiompas_df,coral_reef_mean,seagrass_bed_mean,mangrove_mean,coral_reef_fish_mean,wiompa_connect_means, sharks_mean,    
+                                 chl_mean,no3_mean,o2_mean,phyc_mean,so_mean,thetao_mean,rdi_mean,pop_dens_mean,travel_time_means,
                                  gravity_mean,artisanal_fishing_mean,coastal_tourism_mean,demersal_gillnet_mean,
                                  demersal_trawl_mean,dredging_mean,dumping_mean, floating_longline_mean,
                                  industrial_pollution_mean,nutrient_input_mean,ocean_acidification_mean,oil_gas_industry_mean,
@@ -876,39 +958,67 @@ write.csv(wiompas_df_var_means,"wiompas_df_var_means.csv")
 # Bind internal and contextual enabling conditions to polygon and variable mean data frame
 
 wiompas_cond <- read_csv("wiompa_internal_contextual_conditions.csv")
-wiompas_cond_2 <- wiompas_cond [,-c(2:5,55,80:85,87:93,95:101,103:109,111:117,119:125)]
+wiompas_cond_2 <- wiompas_cond [,-c(2:5,55,62,79:85,87:93,95:101,103:109,111:117,119:125,129:131)]
 wiompas_df_var_means_2 <- wiompas_df_var_means [,-c(14)]
 wiompas_df_var_means_cond <- left_join(wiompas_df_var_means_2, wiompas_cond_2, by = "ID")
 
-#wiompas_cond[125]
-
-wiompas_df_var_means_cond_conn<- left_join(wiompas_df_var_means_cond, wiompa_connect_means, by = "ROW_ID")
-
-wiompas_df_var_means_cond_conn_TT<- left_join(wiompas_df_var_means_cond_conn, travel_time_means, by = "ROW_ID")
 
 # Update year of establishment for Parc National Mitsamiouli Ndroude from UNEP-WCMC (2026). Protected Area Profile for Parc National Mitsamiouli Ndroude from the World Database on Protected Areas, November 2026. Available at: www.protectedplanet.net
-wiompas_df_var_means_cond_conn_TT <- wiompas_df_var_means_cond_conn_TT%>% 
-  mutate(YEAR = ifelse(YEAR=="Not available", 2010, YEAR))
+wiompas_df_var_means_cond <- wiompas_df_var_means_cond%>% 
+  mutate(YEAR = ifelse(YEAR=="Not available", 2010, YEAR)) %>%
+  mutate(YEAR=as.numeric(YEAR))
 
-wiompas_df_var_means_cond_conn_TT<- wiompas_df_var_means_cond_conn_TT %>% 
+wiompas_df_var_means_cond<- wiompas_df_var_means_cond %>% 
   mutate(YEAR = 2018 - YEAR)  %>% rename(AGE=YEAR)
 
+
+
 # Save and inspect full matrix
-write_csv(wiompas_df_var_means_cond_conn_TT,"wiompas_df_var_means_cond_conn_TT.csv")
+write_csv(wiompas_df_var_means_cond,"wiompas_df_var_means_cond.csv")
+
+# evaluate NAs
+
+### by variable
+wio_mpa_df_var_NAs<-miss_var_summary(wiompas_df_var_means_cond)
+
+wio_mpa_df_var_NAs_df<-as.data.frame(wio_mpa_df_var_NAs)
+
+write_csv(wio_mpa_df_var_NAs_df,"wio_mpa_df_var_NAs_df.csv")
+
+### by MPA
+wio_mpa_df_case_NAs<-miss_case_summary(wiompas_df_var_means_cond)
+
+wio_mpa_df_case_NAs_df<-as.data.frame(wio_mpa_df_case_NAs)
+
+wiompas_NAMES<-wiompas_df_var_means_cond[,c(3,4,23)] #subset MPA names
+
+wio_mpa_df_case_NAs_df_2 <- wio_mpa_df_case_NAs_df %>% 
+  left_join(wiompas_NAMES, by = join_by(case == ROW_ID))
 
 
-# SUbset matrix in preparation for PCA analysis
+write_csv(wio_mpa_df_case_NAs_df_2,"wio_mpa_NAs_df.csv")
 
-wio_mpa_df<- wiompas_df_var_means_cond_conn_TT [,-c(1:3,6:10,12:15,17:21,24,75:88,134:137)]
 
-swio_mpa_df<- wiompas_df_var_means_cond_conn_TT [,-c(1:3,6:10,12:15,17:21,24,75:88,134:137,139:143)]
+# Subset matrix in preparation for PCA analysis
 
-#wiompas_df_var_means_cond_conn_TT[3]
+wio_mpa_df<- wiompas_df_var_means_cond [,-c(5:9,11:14,16:20,23,82:95,139)]
+
+swio_mpa_df<- wiompas_df_var_means_cond [,-c(5:9,11:14,16:20,23,28:30,40:42,82:95,139)]
 
 wio_mpas_matrix <- na.omit(wio_mpa_df)
 
 swio_mpas_matrix <- na.omit(swio_mpa_df)
 
+#colnames(wio_mpa_df)
+
+
 # Save and inspect matrix subsets 
 write_csv(wio_mpas_matrix,"wio_mpas_matrix.csv")
 write_csv(swio_mpas_matrix,"swio_mpas_matrix.csv")
+
+# Create martix look up data frames
+
+lookup_df <- data.frame(
+  category = c("demographics", "demographics", "grades", "grades", "engagement"),
+  col_name = c("student_id", "first_name", "math_score", "sci_score", "attendance_pct")
+)

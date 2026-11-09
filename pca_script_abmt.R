@@ -14,8 +14,10 @@ rm(list=ls())
 
 wio_mpas <- read_csv("C:/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/chapter_3_governance effectiveness at different scales in the SWIO/analysis/r/wio_abmt/wio_mpas_matrix.csv")
 
+colnames(wio_mpas)
+
 # Standardize all numeric columns
-wio_mpas_pca  <- wio_mpas[,-c(1:2,52,70)] %>% 
+wio_mpas_pca  <- wio_mpas[,-c(1:4,62,80)] %>% 
   mutate(across(where(is.numeric), ~as.vector(scale(.))))
 
 wio_mpas_pca <-  wio_mpas_pca %>% 
@@ -37,11 +39,15 @@ write_csv(pca_eig, "wio_mpa_pca_eig.csv")
 
 variable_contri_pct<-as.data.frame(pca$quanti$contrib.pct)
 
-write_csv(variable_contri_pct, "variable_contri_pct.csv")
+write.csv(variable_contri_pct, "variable_contri_pct.csv")
 
 ind_cos2<-as.data.frame(pca$ind$cos2)
 
-variable_cos2<-as.data.frame(pca$quanti$cos2)
+ind_cos2 <- ind_cos2 %>% 
+  mutate(MPA_NAME = wio_mpas$MPA_NAME, .before = 1)
+
+variable_quanti_cos2<-as.data.frame(pca$quanti$cos2)
+
 
 write.csv(ind_cos2, "ind_cos2.csv")
 
@@ -61,7 +67,7 @@ wio_mpa_clus<-tuneclus(wio_mpas_pca,
                        alpha = 0, 
                        alphak = NULL, 
                        center = TRUE, 
-                       scale = TRUE, 
+                       scale = FALSE, 
                        rotation = "none", 
                        nstart = 100, 
                        smartStart = NULL, 
@@ -69,12 +75,12 @@ wio_mpa_clus<-tuneclus(wio_mpas_pca,
 
 
 
-# Run integrated PCAmix and K-means (e.g., seeking 2 clusters in 7 dimensions)
+# Run integrated PCAmix and mixed factrial K-means 
 
 res.clus <- cluspcamix(data = wio_mpas_pca, 
                        method = "mixedFKM",
-                       nclus = 16, 
-                       ndim = 12, 
+                       nclus = 15, 
+                       ndim = 14, 
                        alpha = 0, 
                        center = TRUE, 
                        scale = TRUE, 
@@ -89,84 +95,86 @@ res.clus$cluster
 
 wio_mpas$cluster<-res.clus$cluster 
 
+write.csv(wio_mpas,"wio_mpas_clus.csv")
+
 # Plot the individuals colored by their clusters
 plot(res.clus)
 
 # Extract squared loadings
-sqload_df <- as.data.frame(pca$sqload)
-sqload_df$Variable <- rownames(sqload_df)
+var_quant_cos2_df <- as.data.frame(pca$quanti$cos2)
+var_quant_cos2_df$Variable <- rownames(var_quant_cos2_df)
 
 # Reshape from wide to long format for ggplot
-sqload_long <- sqload_df %>%
+var_quant_cos2_long <- var_quant_cos2_df %>%
   pivot_longer(cols = starts_with("dim"), 
                names_to = "Dimension", 
-               values_to = "Squared_Loading")
+               values_to = "Squared_cosine")
 
 # Create a bar plot for Dimension 1
-sqload_long %>%
+var_quant_cos2_long %>%
   filter(Dimension == "dim 1") %>%
-  ggplot(aes(x = reorder(Variable, Squared_Loading), y = Squared_Loading, fill = Squared_Loading)) +
+  ggplot(aes(x = reorder(Variable, Squared_cosine), y = Squared_cosine, fill = Squared_cosine)) +
   geom_col() +
   coord_flip() +
   labs(
-    title = "Variable Contributions (Squared Loadings) - Dimension 1 (24.01%)",
-    x = "Variables (Quantitative & Qualitative)",
-    y = "Squared Loading (Contribution)"
+    title = "Squared cosines  - Dimension 1 (29.61 %)",
+    x = "Variables (Quantitative)",
+    y = "Squared cosine (quality of representation)"
   ) +
   theme_minimal() +
   scale_fill_viridis_c(guide = "none")
 
 # Create a bar plot for Dimension 2
-sqload_long %>%
+var_quant_cos2_long %>%
   filter(Dimension == "dim 2") %>%
-  ggplot(aes(x = reorder(Variable, Squared_Loading), y = Squared_Loading, fill = Squared_Loading)) +
+  ggplot(aes(x = reorder(Variable, Squared_cosine), y = Squared_cosine, fill = Squared_cosine)) +
   geom_col() +
   coord_flip() +
   labs(
-    title = "Variable Contributions (Squared Loadings) - Dimension 2 (16.26%)",
-    x = "Variables (Quantitative & Qualitative)",
-    y = "Squared Loading (Contribution)"
+    title = "Squared cosines  - Dimension 2 (11.38 %)",
+    x = "Variables (Quantitative)",
+    y = "Squared cosine (quality of representation)"
   ) +
   theme_minimal() +
   scale_fill_viridis_c(guide = "none")
 
 # Create a bar plot for Dimension 3
-sqload_long %>%
+var_quant_cos2_long %>%
   filter(Dimension == "dim 3") %>%
-  ggplot(aes(x = reorder(Variable, Squared_Loading), y = Squared_Loading, fill = Squared_Loading)) +
+  ggplot(aes(x = reorder(Variable, Squared_cosine), y = Squared_cosine, fill = Squared_cosine)) +
   geom_col() +
   coord_flip() +
   labs(
-    title = "Variable Contributions (Squared Loadings) - Dimension 3 (12.3%)",
-    x = "Variables (Quantitative & Qualitative)",
-    y = "Squared Loading (Contribution)"
+    title = "Squared cosines  - Dimension 3 (10.13 %)",
+    x = "Variables (Quantitative)",
+    y = "Squared cosine (quality of representation)"
   ) +
   theme_minimal() +
   scale_fill_viridis_c(guide = "none")
 
 # Create a bar plot for Dimension 4
-sqload_long %>%
+var_quant_cos2_long %>%
   filter(Dimension == "dim 4") %>%
-  ggplot(aes(x = reorder(Variable, Squared_Loading), y = Squared_Loading, fill = Squared_Loading)) +
+  ggplot(aes(x = reorder(Variable, Squared_cosine), y = Squared_cosine, fill = Squared_cosine)) +
   geom_col() +
   coord_flip() +
   labs(
-    title = "Variable Contributions (Squared Loadings) - Dimension 4 (9.43%)",
-    x = "Variables (Quantitative & Qualitative)",
-    y = "Squared Loading (Contribution)"
+    title = "Squared cosines  - Dimension 4 (8.15 %)",
+    x = "Variables (Quantitative)",
+    y = "Squared cosine (quality of representation)"
   ) +
   theme_minimal() +
   scale_fill_viridis_c(guide = "none")
 
 # Plot Dim 1 vs Dim 2 squared loadings
-ggplot(sqload_df, aes(x = `dim 1`, y = `dim 2`, label = Variable)) +
+ggplot(var_quant_cos2_df , aes(x = `dim 1`, y = `dim 2`, label = Variable)) +
   geom_text_repel(max.overlaps = Inf, box.padding=0.5, size=4)+
   geom_point(color = "steelblue", size = 3) +
   xlim(0, 1) + ylim(0, 1) +
   labs(
-    title = "PCAmix Variable Contributions (Squared Loadings)",
-    x = "Dimension 1 Squared Loading (24.01%)",
-    y = "Dimension 2 Squared Loading (16.26%)"
+    title = "",
+    x = "Dimension 1 Squared cosine (29.61%)",
+    y = "Dimension 2 Squared cosine (11.38%)"
   ) +
   theme_classic()
 
@@ -174,14 +182,14 @@ ggplot(sqload_df, aes(x = `dim 1`, y = `dim 2`, label = Variable)) +
 levels_df <- as.data.frame(pca$levels$coord)
 levels_df$Level <- rownames(levels_df)
 
-# Optional: Extract percentage of variance explained for axis labels
+# Extract percentage of variance explained for axis labels
 eig <- pca$eig
 pct1 <- round(eig[1, 2], 1)
 pct2 <- round(eig[2, 2], 1)
 pct3 <- round(eig[3, 2], 1)
 pct4 <- round(eig[4, 2], 1)
 
-# Plot with ggplot2
+# levels plot for dim 1 and dim 2
 ggplot(levels_df, aes(x = `dim 1`, y = `dim 2`, label = Level)) +
   geom_point(color = "maroon", size = 2) +
   geom_text_repel(max.overlaps = Inf, box.padding=0.5,size = 4)+
@@ -197,6 +205,37 @@ ggplot(levels_df, aes(x = `dim 1`, y = `dim 2`, label = Level)) +
 # Extract individual coordinates into a data frame
 ind_coords <- as.data.frame(pca$ind$coord)
 
+# levels plot for dim 1 and dim 3
+ggplot(levels_df, aes(x = `dim 1`, y = `dim 3`, label = Level)) +
+  geom_point(color = "maroon", size = 2) +
+  geom_text_repel(max.overlaps = Inf, box.padding=0.5,size = 4)+
+  geom_hline(yintercept = 0, linetype = "dashed", color = "black") +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
+  labs(
+    title = "PCAmix: Levels Component Map",
+    x = paste0("Dimension 1 (", pct1, "%)"),
+    y = paste0("Dimension 3 (", pct3, "%)")
+  ) +
+  theme_classic()
+
+# levels plot for dim 2 and dim 3
+ggplot(levels_df, aes(x = `dim 2`, y = `dim 3`, label = Level)) +
+  geom_point(color = "maroon", size = 2) +
+  geom_text_repel(max.overlaps = Inf, box.padding=0.5,size = 4)+
+  geom_hline(yintercept = 0, linetype = "dashed", color = "black") +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
+  labs(
+    title = "PCAmix: Levels Component Map",
+    x = paste0("Dimension 2 (", pct2, "%)"),
+    y = paste0("Dimension 3 (", pct3, "%)")
+  ) +
+  theme_classic()
+
+# Extract individual coordinates into a data frame
+ind_coords <- as.data.frame(pca$ind$coord)
+
+# Extract individual coordinates into a data frame
+ind_coords <- as.data.frame(pca$ind$coord)
 # Add metadata/labels for ggplot mapping (e.g., Label/Type)
 wio_mpas_i<-wio_mpas %>% 
   mutate(index = row_number())

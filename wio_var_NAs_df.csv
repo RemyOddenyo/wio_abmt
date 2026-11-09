@@ -1,0 +1,141 @@
+variable,n_miss,pct_miss
+mean_ConnAct,25,24.271844660194176
+mean_ConnInAct,25,24.271844660194176
+mean_ConnOtAct,25,24.271844660194176
+mean_TT_pop,23,22.330097087378643
+mean_TT_market,23,22.330097087378643
+Fisheries dependency: food security,14,13.592233009708737
+connect_resil,10,9.70873786407767
+exist_use_status,9,8.737864077669903
+gravity_mean,8,7.766990291262135
+repres_repli_habitats,8,7.766990291262135
+curr_emer_threats,8,7.766990291262135
+exist_threats_mitigation,8,7.766990291262135
+rights_tenure_uses,8,7.766990291262135
+MPA_viability,7,6.796116504854369
+acc_cost_benefit,7,6.796116504854369
+benefit_sharing,7,6.796116504854369
+consevation _value,7,6.796116504854369
+monitor_eval_know,7,6.796116504854369
+livelihood,7,6.796116504854369
+local_trust_leadership_partnership,7,6.796116504854369
+cultural_values_traditions,7,6.796116504854369
+rules_rights_boundaries_Zonation,4,3.8834951456310676
+rdi_mean,3,2.912621359223301
+METT_score,3,2.912621359223301
+Climate_change,2,1.9417475728155338
+Mining,2,1.9417475728155338
+Poaching,2,1.9417475728155338
+Water_extraction,2,1.9417475728155338
+Natural_disasters,2,1.9417475728155338
+MPA_frag,2,1.9417475728155338
+Socioecon,2,1.9417475728155338
+Human_pressure,2,1.9417475728155338
+Boundary_integrity,2,1.9417475728155338
+Invasives,2,1.9417475728155338
+Legal_status,2,1.9417475728155338
+Pollution,2,1.9417475728155338
+Tourism,2,1.9417475728155338
+coral_reef_mean,1,0.9708737864077669
+seagrass_bed_mean,1,0.9708737864077669
+mangrove_mean,1,0.9708737864077669
+coral_reef_fish_mean,1,0.9708737864077669
+sharks_mean,1,0.9708737864077669
+pop_dens_mean,1,0.9708737864077669
+artisanal_fishing_mean,1,0.9708737864077669
+coastal_tourism_mean,1,0.9708737864077669
+demersal_gillnet_mean,1,0.9708737864077669
+demersal_trawl_mean,1,0.9708737864077669
+dredging_mean,1,0.9708737864077669
+dumping_mean,1,0.9708737864077669
+floating_longline_mean,1,0.9708737864077669
+industrial_pollution_mean,1,0.9708737864077669
+nutrient_input_mean,1,0.9708737864077669
+ocean_acidification_mean,1,0.9708737864077669
+oil_gas_industry_mean,1,0.9708737864077669
+pelagic_seine_mean,1,0.9708737864077669
+piers_and_docks_mean,1,0.9708737864077669
+plastic_litter_mean,1,0.9708737864077669
+ports_mean,1,0.9708737864077669
+sea_level_rise_mean,1,0.9708737864077669
+temperature_rise_mean,1,0.9708737864077669
+weighted_longline_mean,1,0.9708737864077669
+staffing_funding_Staff_cap,1,0.9708737864077669
+staffing_funding_Staff_dev,1,0.9708737864077669
+adm_struc_proc_Infra,1,0.9708737864077669
+adm_struc_proc_Infra_maint,1,0.9708737864077669
+Stakeholder_engage_Pub_awareness,1,0.9708737864077669
+wellbeing_Communities,1,0.9708737864077669
+IDN,0,0
+ID_MJ,0,0
+MPA_NAME,0,0
+COUNTRY,0,0
+REGION,0,0
+DESGNATION,0,0
+STATUS,0,0
+CATEGORY,0,0
+CATEGORY2,0,0
+AGE,0,0
+ZONE,0,0
+MANAGED_BY,0,0
+IUCN,0,0
+AREAKM_DEC,0,0
+AREAKM_ACT,0,0
+PERIKM_ACT,0,0
+POINT_X,0,0
+POINT_Y,0,0
+ID,0,0
+NAME_METT,0,0
+STAGE,0,0
+LEVEL,0,0
+ROW_ID,0,0
+chl_mean,0,0
+no3_mean,0,0
+o2_mean,0,0
+phyc_mean,0,0
+so_mean,0,0
+thetao_mean,0,0
+rules_rights_boundaries_Legal,0,0
+rules_rights_boundaries_PA_Regulations,0,0
+rules_rights_boundaries_Boundaries,0,0
+rules_rights_boundaries_Mgt_plan,0,0
+adm_struc_proc_Mgt_plan_imp,0,0
+staffing_funding_Budget,0,0
+adpt_mgt_OPLAN,0,0
+adm_struc_proc_Admin_support,0,0
+adm_struc_proc_Equip,0,0
+adm_struc_proc_Equip_maint,0,0
+adpt_mgt_Biodive_invent,0,0
+eff_mgt_Ecol_process,0,0
+monit_eva_sharing_Research,0,0
+Compl_enfor_Protect_system,0,0
+Life expectancy at birth,0,0
+Expected years of schooling,0,0
+Mean years of schooling,0,0
+Gross national income (GNI) per capita,0,0
+GNI per capita rank minus HDI rank,0,0
+HDI rank_2022,0,0
+HDI,0,0
+Inequality-adjusted HDI (IHDI),0,0
+IHDI_overall loss,0,0
+IHDI_HDI rank difference,0,0
+Coefficient of human inequality,0,0
+Inequality in life expectancy,0,0
+Inequality-adjusted life expectancy index,0,0
+Inequality in education,0,0
+Inequality-adjusted education index,0,0
+Inequality in income,0,0
+Inequality-adjusted income index,0,0
+Incomes_Poorest 40 percent,0,0
+Incomes_Richest 10 percent,0,0
+Incomes_Richest 1 percent,0,0
+Gini coefficient,0,0
+Governance_est_va,0,0
+Governance_est_pv,0,0
+Governance_est_ge,0,0
+Governance_est_rq,0,0
+Governance_est_rl,0,0
+Governance_est_cc,0,0
+Fisheries dependency: economy,0,0
+Fisheries dependency: employment,0,0
+seafoood_consuption_kg_capital_yr,0,0
