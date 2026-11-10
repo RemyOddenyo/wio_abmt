@@ -9,12 +9,20 @@ coral_reef_mean,ecological_factor
 seagrass_bed_mean,ecological_factor
 mangrove_mean,ecological_factor
 coral_reef_fish_mean,ecological_factor
+mean_ConnAct,ecological_factor
+mean_ConnInAct,ecological_factor
+mean_ConnOtAct,ecological_factor
+sharks_mean,ecological_factor
 chl_mean,ecological_factor
 no3_mean,ecological_factor
 o2_mean,ecological_factor
 phyc_mean,ecological_factor
 so_mean,ecological_factor
 thetao_mean,ecological_factor
+rdi_mean,contextaul_enabling_condition
+pop_dens_mean,contextaul_enabling_condition
+mean_TT_pop,threat
+mean_TT_market,threat
 gravity_mean,threat
 artisanal_fishing_mean,threat
 coastal_tourism_mean,threat
@@ -50,11 +58,11 @@ adm_struc_proc_Infra_maint,internal_enabling_condition
 adm_struc_proc_Equip,internal_enabling_condition
 adm_struc_proc_Equip_maint,internal_enabling_condition
 adpt_mgt_Biodive_invent,internal_enabling_condition
-eff_mgt_Ecol_process,internal_enabling_condition
+eff_mgt_Ecol_process,ecological_outcome
 monit_eva_sharing_Research,internal_enabling_condition
 Compl_enfor_Protect_system,internal_enabling_condition
 Stakeholder_engage_Pub_awareness,internal_enabling_condition
-wellbeing_Communities,internal_enabling_condition
+wellbeing_Communities,threat
 Climate_change,threat
 Mining,threat
 Poaching,threat
@@ -75,7 +83,6 @@ Mean years of schooling,contextaul_enabling_condition
 Gross national income (GNI) per capita,contextaul_enabling_condition
 GNI per capita rank minus HDI rank,contextaul_enabling_condition
 HDI rank_2022,contextaul_enabling_condition
-HDI rank,contextaul_enabling_condition
 HDI,contextaul_enabling_condition
 Inequality-adjusted HDI (IHDI),contextaul_enabling_condition
 IHDI_overall loss,contextaul_enabling_condition
@@ -92,7 +99,6 @@ Incomes_Richest 10 percent,contextaul_enabling_condition
 Incomes_Richest 1 percent,contextaul_enabling_condition
 Gini coefficient,contextaul_enabling_condition
 Governance_est_va,contextaul_enabling_condition
-Governance_est_va_se,contextaul_enabling_condition
 Governance_est_pv,contextaul_enabling_condition
 Governance_est_ge,contextaul_enabling_condition
 Governance_est_rq,contextaul_enabling_condition
@@ -101,8 +107,3 @@ Governance_est_cc,contextaul_enabling_condition
 Fisheries dependency: economy,contextaul_enabling_condition
 Fisheries dependency: employment,contextaul_enabling_condition
 seafoood_consuption_kg_capital_yr,contextaul_enabling_condition
-mean_ConnAct,ecological_factor
-mean_ConnInAct,ecological_factor
-mean_ConnOtAct,ecological_factor
-mean_TT_pop,threat
-mean_TT_market,threat
