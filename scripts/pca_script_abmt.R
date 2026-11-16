@@ -12,9 +12,9 @@ library(PCDimension)
 
 #rm(list=ls())
 
-wio_mpas <-read_csv("csv/wio_mpas_matrix_2.csv") # "_2" data without variables grouped by country e.g. hdi
+wio_mpas_2 <-read_csv("csv/wio_mpas_matrix_2.csv") # "_2" data without variables grouped by country e.g. hdi
 
-colnames(wio_mpas)
+colnames(wio_mpas_2)
 
 # Standardize all numeric columns
 #wio_mpas_pca  <- wio_mpas[,-c(1:4,62,80)] %>% 
