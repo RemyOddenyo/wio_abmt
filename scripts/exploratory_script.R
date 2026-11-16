@@ -6,7 +6,7 @@ library(patchwork)
 
 
 # import internal and contextual anabling conditions for MPAs
-wiompa_cond<- read_csv("csv/wiompa_internal_contextual_conditions.csv")
+wiompa_cond<- read_csv("csv/wiompas_fin.csv")
 View(wiompa_cond)
 
 # calculate summary statistics
@@ -16,7 +16,7 @@ dfSummary(wiompa_cond) %>% stview()
 
 # plot of distribution of levels of protection
 
-wiompa_stage<-ggplot(wiompa_cond, aes(x = Country, fill = protection_level)) +
+wiompa_stage<-ggplot(wiompa_cond, aes(x = COUNTRY, fill = LEVEL)) +
   geom_bar(position = "dodge") +
   labs(
     title = "Distribution of MPA levels of protection in the WIO",
@@ -34,7 +34,7 @@ wiompa_stage<-ggplot(wiompa_cond, aes(x = Country, fill = protection_level)) +
 
 # plot of distribution of stage of establishment
 
-wiompa_level<-ggplot(wiompa_cond, aes(x = Country, fill = establishment_stage)) +
+wiompa_level<-ggplot(wiompa_cond, aes(x = COUNTRY, fill = STAGE)) +
   geom_bar(position = "dodge") +
   labs(
     title = "Distribution of MPA stages of establishment in the WIO",
@@ -59,7 +59,7 @@ wiompa_stages_levels<-wiompa_cond[,c(2:5)]
 
 wiompa_unclassified <- wiompa_stages_levels %>% 
   filter(
-    establishment_stage == "Unclassified" | 
-      protection_level == "Unclassified"
+    STAGE == "Unclassified" | 
+      LEVEL == "Unclassified"
     )
 write_csv(wiompa_unclassified,"wiompa_unclassified.csv")

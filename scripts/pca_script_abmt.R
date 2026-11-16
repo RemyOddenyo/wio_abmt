@@ -10,15 +10,18 @@ library(plot3D)
 library(NbClust)
 library(PCDimension)
 
-rm(list=ls())
+#rm(list=ls())
 
-wio_mpas <- read_csv("C:/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/chapter_3_governance effectiveness at different scales in the SWIO/analysis/r/wio_abmt/wio_mpas_matrix.csv")
+wio_mpas <-read_csv("csv/wio_mpas_matrix_2.csv") # "_2" data without variables grouped by country e.g. hdi
 
 colnames(wio_mpas)
 
 # Standardize all numeric columns
-wio_mpas_pca  <- wio_mpas[,-c(1:4,62,80)] %>% 
-  mutate(across(where(is.numeric), ~as.vector(scale(.))))
+#wio_mpas_pca  <- wio_mpas[,-c(1:4,62,80)] %>% 
+ # mutate(across(where(is.numeric), ~as.vector(scale(.))))
+
+wio_mpas_pca  <- wio_mpas[,-c(1:4,62)] %>% 
+  mutate(across(where(is.numeric), ~as.vector(scale(.)))) #"_2" data without variables grouped by country e.g. hdi
 
 wio_mpas_pca <-  wio_mpas_pca %>% 
   mutate(across(c(STAGE, LEVEL), as.factor))
@@ -29,17 +32,17 @@ X.quali <- splitmix(wio_mpas_pca)$X.quali
 pca<-PCAmix(X.quanti,X.quali,ndim=20,rename.level=TRUE)
 pca<-PCAmix(X.quanti,X.quali,ndim=20,graph=FALSE, rename.level=TRUE)
 
-# Dimension eigenvalue, share observed, cumulative shareand squared cosines
+# Dimension eigenvalue, share observed, cumulative share and squared cosines
 
 pca_eig<-pca$eig
 
 pca_eig<-as.data.frame(pca_eig)
 
-write_csv(pca_eig, "wio_mpa_pca_eig.csv")
+write_csv(pca_eig, "wio_mpa_pca_eig_2.csv")
 
 variable_contri_pct<-as.data.frame(pca$quanti$contrib.pct)
 
-write.csv(variable_contri_pct, "variable_contri_pct.csv")
+write.csv(variable_contri_pct, "variable_contri_pct_2.csv")
 
 ind_cos2<-as.data.frame(pca$ind$cos2)
 
@@ -49,9 +52,9 @@ ind_cos2 <- ind_cos2 %>%
 variable_quanti_cos2<-as.data.frame(pca$quanti$cos2)
 
 
-write.csv(ind_cos2, "ind_cos2.csv")
+write.csv(ind_cos2, "ind_cos2_2.csv")
 
-write.csv(variable_cos2, "variable_cos2.csv")
+write.csv(variable_quanti_cos2, "variable_cos2_2.csv")
 
 # Compare with broken stick values
 # bstick(length(res.pcamix$eig[, 1]), tot.inertia = sum(res.pcamix$eig[, 1]))
@@ -79,7 +82,7 @@ wio_mpa_clus<-tuneclus(wio_mpas_pca,
 
 res.clus <- cluspcamix(data = wio_mpas_pca, 
                        method = "mixedFKM",
-                       nclus = 15, 
+                       nclus = 16, 
                        ndim = 14, 
                        alpha = 0, 
                        center = TRUE, 
@@ -95,73 +98,141 @@ res.clus$cluster
 
 wio_mpas$cluster<-res.clus$cluster 
 
-write.csv(wio_mpas,"wio_mpas_clus.csv")
+write.csv(wio_mpas,"wio_mpas_clus_2.csv")
 
 # Plot the individuals colored by their clusters
 plot(res.clus)
 
-# Extract squared loadings
+# Extract cos2
 var_quant_cos2_df <- as.data.frame(pca$quanti$cos2)
 var_quant_cos2_df$Variable <- rownames(var_quant_cos2_df)
 
-# Reshape from wide to long format for ggplot
+# Extract squared loadings
+var_quant_sqload_df <- as.data.frame(pca$sqload)
+var_quant_sqload_df$Variable <- rownames(var_quant_sqload_df)
+
+
+# Reshape from wide to long format for ggplot- cos2
 var_quant_cos2_long <- var_quant_cos2_df %>%
   pivot_longer(cols = starts_with("dim"), 
                names_to = "Dimension", 
                values_to = "Squared_cosine")
 
-# Create a bar plot for Dimension 1
+# Create a bar plot for Dimension 1 - cos2
 var_quant_cos2_long %>%
   filter(Dimension == "dim 1") %>%
   ggplot(aes(x = reorder(Variable, Squared_cosine), y = Squared_cosine, fill = Squared_cosine)) +
   geom_col() +
   coord_flip() +
   labs(
-    title = "Squared cosines  - Dimension 1 (29.61 %)",
+    title = "Squared cosines  - Dimension 1 (15.89 %)",
     x = "Variables (Quantitative)",
     y = "Squared cosine (quality of representation)"
   ) +
   theme_minimal() +
   scale_fill_viridis_c(guide = "none")
 
-# Create a bar plot for Dimension 2
+
+# Reshape from wide to long format for ggplot
+var_quant_sqload_long <- var_quant_sqload_df %>%
+  pivot_longer(cols = starts_with("dim"), 
+               names_to = "Dimension", 
+               values_to = "Squared_cosine")
+
+# Create a bar plot for Dimension 1 - sqload
+var_quant_sqload_long %>%
+  filter(Dimension == "dim 1") %>%
+  ggplot(aes(x = reorder(Variable, Squared_cosine), y = Squared_cosine, fill = Squared_cosine)) +
+  geom_col() +
+  coord_flip() +
+  labs(
+    title = "Squared loading  - Dimension 1 (15.89 %)",
+    x = "Variables",
+    y = "Squared loading (variable contributions)"
+  ) +
+  theme_minimal() +
+  scale_fill_viridis_c(guide = "none")
+
+# Create a bar plot for Dimension 2 - cos2
 var_quant_cos2_long %>%
   filter(Dimension == "dim 2") %>%
   ggplot(aes(x = reorder(Variable, Squared_cosine), y = Squared_cosine, fill = Squared_cosine)) +
   geom_col() +
   coord_flip() +
   labs(
-    title = "Squared cosines  - Dimension 2 (11.38 %)",
+    title = "Squared cosines  - Dimension 2 (13.84 %)",
     x = "Variables (Quantitative)",
     y = "Squared cosine (quality of representation)"
   ) +
   theme_minimal() +
   scale_fill_viridis_c(guide = "none")
 
-# Create a bar plot for Dimension 3
+# Create a bar plot for Dimension 2 - sqload
+var_quant_sqload_long %>%
+  filter(Dimension == "dim 2") %>%
+  ggplot(aes(x = reorder(Variable, Squared_cosine), y = Squared_cosine, fill = Squared_cosine)) +
+  geom_col() +
+  coord_flip() +
+  labs(
+    title = "Squared loading  - Dimension 2 (13.84 %)",
+    x = "Variables",
+    y = "Squared loading (variable contributions)"
+  ) +
+  theme_minimal() +
+  scale_fill_viridis_c(guide = "none")
+
+# Create a bar plot for Dimension 3 - cos2
 var_quant_cos2_long %>%
   filter(Dimension == "dim 3") %>%
   ggplot(aes(x = reorder(Variable, Squared_cosine), y = Squared_cosine, fill = Squared_cosine)) +
   geom_col() +
   coord_flip() +
   labs(
-    title = "Squared cosines  - Dimension 3 (10.13 %)",
+    title = "Squared cosines  - Dimension 3 (13.28 %)",
     x = "Variables (Quantitative)",
     y = "Squared cosine (quality of representation)"
   ) +
   theme_minimal() +
   scale_fill_viridis_c(guide = "none")
 
-# Create a bar plot for Dimension 4
+# Create a bar plot for Dimension 3 - sqload
+var_quant_sqload_long %>%
+  filter(Dimension == "dim 3") %>%
+  ggplot(aes(x = reorder(Variable, Squared_cosine), y = Squared_cosine, fill = Squared_cosine)) +
+  geom_col() +
+  coord_flip() +
+  labs(
+    title = "Squared loading  - Dimension 3 (13.28 %)",
+    x = "Variables",
+    y = "Squared loading (variable contributions)"
+  ) +
+  theme_minimal() +
+  scale_fill_viridis_c(guide = "none")
+
+# Create a bar plot for Dimension 4 - cos2
 var_quant_cos2_long %>%
   filter(Dimension == "dim 4") %>%
   ggplot(aes(x = reorder(Variable, Squared_cosine), y = Squared_cosine, fill = Squared_cosine)) +
   geom_col() +
   coord_flip() +
   labs(
-    title = "Squared cosines  - Dimension 4 (8.15 %)",
+    title = "Squared cosines  - Dimension 4 (8.89 %)",
     x = "Variables (Quantitative)",
     y = "Squared cosine (quality of representation)"
+  ) +
+  theme_minimal() +
+  scale_fill_viridis_c(guide = "none")
+
+# Create a bar plot for Dimension 4 - sqload
+var_quant_sqload_long %>%
+  filter(Dimension == "dim 4") %>%
+  ggplot(aes(x = reorder(Variable, Squared_cosine), y = Squared_cosine, fill = Squared_cosine)) +
+  geom_col() +
+  coord_flip() +
+  labs(
+    title = "Squared loading  - Dimension 4 (8.89 %)",
+    x = "Variables",
+    y = "Squared loading (variable contributions)"
   ) +
   theme_minimal() +
   scale_fill_viridis_c(guide = "none")

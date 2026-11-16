@@ -6,63 +6,68 @@ library(tidyverse)
 library(psych)
 library(naniar)
 
-rm(list=ls())
+#rm(list=ls())
 
 # Load MPA and land polygons
-wiompas <- st_read("/Users/48483117/OneDrive - Macquarie University/Documents/wiompas_fin.shp")
+wiompas <- st_read("shapefiles/wiompas_fin.shp")
 
 wiompa_df <- wiompas %>%
   st_drop_geometry()
+
+# Save wio mpas as csv (n=103)
+
+write.csv(wiompa_df,"wiompas_fin.csv")
+
 #wiompas$ID <- seq_len(nrow(wiompas))#  add an ID column
-land<-st_read("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/chapter_3_governance effectiveness at different scales in the SWIO/data/gis/S2Coast_2023.shp")
+land<-st_read("shapefiles/S2Coast2023_ShapeFile_vector/S2Coast_2023.shp")
 
 land_transform<-st_transform(land, st_crs(wiompas_v)) # streamline projections
 wio_bbox <- ext(-722533.6, 3953430, -5303506, -208260.7) # for cropping to wio region
 land_transform<- st_crop(land_transform, wio_bbox) 
 
 # Load critical habitat and coral reef fish layers
-coral_reef<-rast("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/Chapter_3_governance effectiveness at different scales in the SWIO/data/wiosym/eco/coral_reef.tif")
-seagrass_bed<-rast("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/Chapter_3_governance effectiveness at different scales in the SWIO/data/wiosym/eco/seagrass_bed.tif")
-mangrove<-rast("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/Chapter_3_governance effectiveness at different scales in the SWIO/data/wiosym/eco/mangrove.tif")
-coral_reef_fish<-rast("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/Chapter_3_governance effectiveness at different scales in the SWIO/data/wiosym/eco/coral_reef_fish.tif")
-sharks<-rast("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/Chapter_3_governance effectiveness at different scales in the SWIO/data/wiosym/eco/sharks.tif")
+coral_reef<-rast("data/wiosym/eco/coral_reef.tif")
+seagrass_bed<-rast("data/wiosym/eco/seagrass_bed.tif")
+mangrove<-rast("data/wiosym/eco/mangrove.tif")
+coral_reef_fish<-rast("data/wiosym/eco/coral_reef_fish.tif")
+sharks<-rast("data/wiosym/eco/sharks.tif")
 
 
 #Load connectivity data 
-wiompa_connect <- st_read("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/chapter_3_governance effectiveness at different scales in the SWIO/data/gis/Global_connectivity_active_connectance_shapefile/Global_connectivity_active_connectance.shp")
+wiompa_connect <- st_read("data/gis/Global_connectivity_active_connectance_shapefile/Global_connectivity_active_connectance.shp")
 
 # Load environmental factors
 
-chl <- rast("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/chapter_3_governance effectiveness at different scales in the SWIO/data/environmental/chl_baseline_2000_2018_depthsurf_91d8_fb73_4955_U1791756259567.nc")
-no3 <- rast("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/chapter_3_governance effectiveness at different scales in the SWIO/data/environmental/no3_baseline_2000_2018_depthsurf_8486_b388_df7c_U1791756169968.nc")
-o2 <- rast("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/chapter_3_governance effectiveness at different scales in the SWIO/data/environmental/o2_baseline_2000_2018_depthsurf_c6cd_716c_f3fc_U1791756200079.nc")
-phyc <- rast("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/chapter_3_governance effectiveness at different scales in the SWIO/data/environmental/phyc_baseline_2000_2020_depthsurf_b57c_78d1_ca7a_U1791756235321.nc")
-so <- rast("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/chapter_3_governance effectiveness at different scales in the SWIO/data/environmental/so_baseline_2000_2019_depthsurf_49ed_5fc4_602c_U1791756130515.nc")
-thetao <- rast("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/chapter_3_governance effectiveness at different scales in the SWIO/data/environmental/thetao_baseline_2000_2019_depthsurf_74ff_39fa_9adc_U1791756072928.nc")
+chl <- rast("data/environmental/chl_baseline_2000_2018_depthsurf_91d8_fb73_4955_U1791756259567.nc")
+no3 <- rast("data/environmental/no3_baseline_2000_2018_depthsurf_8486_b388_df7c_U1791756169968.nc")
+o2 <- rast("data/environmental/o2_baseline_2000_2018_depthsurf_c6cd_716c_f3fc_U1791756200079.nc")
+phyc <- rast("data/environmental/phyc_baseline_2000_2020_depthsurf_b57c_78d1_ca7a_U1791756235321.nc")
+so <- rast("data/environmental/so_baseline_2000_2019_depthsurf_49ed_5fc4_602c_U1791756130515.nc")
+thetao <- rast("data/environmental/thetao_baseline_2000_2019_depthsurf_74ff_39fa_9adc_U1791756072928.nc")
 
 # Load human pressures
-pop_dens<-rast("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/Chapter_3_governance effectiveness at different scales in the SWIO/data/gpw-v4-population-density-adjusted-to-2015-unwpp-country-totals-rev11_2015_30_sec_tif/gpw_v4_population_density_adjusted_to_2015_unwpp_country_totals_rev11_2015_30_sec.tif")
-travel_time<-st_read("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/Chapter_3_governance effectiveness at different scales in the SWIO/data/gis/Gravity/Global Gravity of Coral Reefs 2.0.shp")
-rdi<-rast("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/Chapter_3_governance effectiveness at different scales in the SWIO/data/povmap-grdi-v1-geotiff/povmap-grdi-v1.tif")
-gravity<-rast("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/Chapter_3_governance effectiveness at different scales in the SWIO/data/gis/wio_gravity_of_markets_maina/wio_gravity_of_markets_maina/logGRAV_WIO_7k.tif")
-artisanal_fishing<-rast("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/Chapter_3_governance effectiveness at different scales in the SWIO/data/wiosym/pres/artisanal_fishing.tif")
-coastal_tourism<-rast("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/Chapter_3_governance effectiveness at different scales in the SWIO/data/wiosym/pres/coastal_tourism.tif")
-demersal_gillnet<-rast("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/Chapter_3_governance effectiveness at different scales in the SWIO/data/wiosym/pres/demersal_gillnet.tif")
-demersal_trawl<-rast("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/Chapter_3_governance effectiveness at different scales in the SWIO/data/wiosym/pres/demersal_trawl.tif")
-dredging<-rast("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/Chapter_3_governance effectiveness at different scales in the SWIO/data/wiosym/pres/dredging.tif")
-dumping<-rast("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/Chapter_3_governance effectiveness at different scales in the SWIO/data/wiosym/pres/dumping.tif")
-floating_longline<-rast("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/Chapter_3_governance effectiveness at different scales in the SWIO/data/wiosym/pres/floating_longline.tif")
-industrial_pollution<-rast("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/Chapter_3_governance effectiveness at different scales in the SWIO/data/wiosym/pres/industrial_pollution.tif")
-nutrient_input<-rast("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/Chapter_3_governance effectiveness at different scales in the SWIO/data/wiosym/pres/nutrient_input.tif")
-ocean_acidification<-rast("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/Chapter_3_governance effectiveness at different scales in the SWIO/data/wiosym/pres/ocean_acidification.tif")
-oil_gas_industry<-rast("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/Chapter_3_governance effectiveness at different scales in the SWIO/data/wiosym/pres/oil_gas_industry.tif")
-pelagic_seine<-rast("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/Chapter_3_governance effectiveness at different scales in the SWIO/data/wiosym/pres/pelagic_seine.tif")
-piers_and_docks<-rast("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/Chapter_3_governance effectiveness at different scales in the SWIO/data/wiosym/pres/piers_and_docks.tif")
-plastic_litter<-rast("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/Chapter_3_governance effectiveness at different scales in the SWIO/data/wiosym/pres/plastic_litter.tif")
-ports<-rast("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/Chapter_3_governance effectiveness at different scales in the SWIO/data/wiosym/pres/ports.tif")
-sea_level_rise<-rast("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/Chapter_3_governance effectiveness at different scales in the SWIO/data/wiosym/pres/sea_level_rise.tif")
-temperature_rise<-rast("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/Chapter_3_governance effectiveness at different scales in the SWIO/data/wiosym/pres/temperature_rise.tif")
-weighted_longline<-rast("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/Chapter_3_governance effectiveness at different scales in the SWIO/data/wiosym/pres/weighted_longline.tif")
+pop_dens<-rast("data/gpw-v4-population-density-adjusted-to-2015-unwpp-country-totals-rev11_2015_30_sec_tif/gpw_v4_population_density_adjusted_to_2015_unwpp_country_totals_rev11_2015_30_sec.tif")
+travel_time<-st_read("data/gis/Gravity/Global Gravity of Coral Reefs 2.0.shp")
+rdi<-rast("data/povmap-grdi-v1-geotiff/povmap-grdi-v1.tif")
+gravity<-rast("data/gis/wio_gravity_of_markets_maina/wio_gravity_of_markets_maina/logGRAV_WIO_7k.tif")
+artisanal_fishing<-rast("data/wiosym/pres/artisanal_fishing.tif")
+coastal_tourism<-rast("data/wiosym/pres/coastal_tourism.tif")
+demersal_gillnet<-rast("data/wiosym/pres/demersal_gillnet.tif")
+demersal_trawl<-rast("data/wiosym/pres/demersal_trawl.tif")
+dredging<-rast("data/wiosym/pres/dredging.tif")
+dumping<-rast("data/wiosym/pres/dumping.tif")
+floating_longline<-rast("data/wiosym/pres/floating_longline.tif")
+industrial_pollution<-rast("data/wiosym/pres/industrial_pollution.tif")
+nutrient_input<-rast("data/wiosym/pres/nutrient_input.tif")
+ocean_acidification<-rast("data/wiosym/pres/ocean_acidification.tif")
+oil_gas_industry<-rast("data/wiosym/pres/oil_gas_industry.tif")
+pelagic_seine<-rast("data/wiosym/pres/pelagic_seine.tif")
+piers_and_docks<-rast("data/wiosym/pres/piers_and_docks.tif")
+plastic_litter<-rast("data/wiosym/pres/plastic_litter.tif")
+ports<-rast("data/wiosym/pres/ports.tif")
+sea_level_rise<-rast("data/wiosym/pres/sea_level_rise.tif")
+temperature_rise<-rast("data/wiosym/pres/temperature_rise.tif")
+weighted_longline<-rast("data/wiosym/pres/weighted_longline.tif")
 
 #se gravity#se function
 se <- function(x, na.rm = FALSE) {
@@ -1002,23 +1007,21 @@ write_csv(wio_mpa_df_case_NAs_df_2,"wio_mpa_NAs_df.csv")
 # Subset matrix in preparation for PCA analysis
 
 wio_mpa_df<- wiompas_df_var_means_cond [,-c(5:9,11:14,16:20,23,82:95,139)]
+wio_mpa_df_2<- wiompas_df_var_means_cond [,-c(5:9,11:14,16:20,23,82:95,108:140)] #grouped variables excluded
 
 swio_mpa_df<- wiompas_df_var_means_cond [,-c(5:9,11:14,16:20,23,28:30,40:42,82:95,139)]
 
 wio_mpas_matrix <- na.omit(wio_mpa_df)
 
+wio_mpas_matrix_2 <- na.omit(wio_mpa_df_2)
+
 swio_mpas_matrix <- na.omit(swio_mpa_df)
 
-#colnames(wio_mpa_df)
+colnames(wiompas_df_var_means_cond)
 
 
 # Save and inspect matrix subsets 
 write_csv(wio_mpas_matrix,"wio_mpas_matrix.csv")
+write_csv(wio_mpas_matrix_2,"wio_mpas_matrix_2.csv")#grouped variables excluded
 write_csv(swio_mpas_matrix,"swio_mpas_matrix.csv")
 
-# Create martix look up data frames
-
-lookup_df <- data.frame(
-  category = c("demographics", "demographics", "grades", "grades", "engagement"),
-  col_name = c("student_id", "first_name", "math_score", "sci_score", "attendance_pct")
-)

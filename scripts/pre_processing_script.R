@@ -3,7 +3,7 @@ library(dplyr)
 library(fuzzyjoin)
 
 # Load WIO MPA polygons
-wiompa_sf <- st_read("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/chapter_3_governance effectiveness at different scales in the SWIO/analysis/r/wio_abmt/gis/WIOMPAS_All_fin/WIOMPAS_All_fin.shp")
+wiompa_sf <- st_read("shapefiles/WIOMPAS_All_fin/WIOMPAS_All_fin.shp")
 
 # Select national MPAs
 
@@ -15,7 +15,7 @@ wiompa_sf_nat_df <- st_drop_geometry(wiompa_sf_nat) # drop geometry
 write.csv(wiompa_sf_nat_df,"wiompa_sf_nat_df.csv")
 
 # Load WIO MPAs surveyed using METT
-wiompas_survyed <- read.csv("/Users/48483117/OneDrive - Macquarie University/Remy's PhD/chapters/chapter_3_governance effectiveness at different scales in the SWIO/analysis/r/wio_abmt/gis/wiompas_surveyed.csv")
+wiompas_survyed <- read.csv("csv/wiompas_surveyed.csv")
 
 # Perform regex join based on a regular expression in one column matching the other
 regex_wiompas<-regex_inner_join(wiompa_sf_nat, wiompas_survyed, by = c("MPA_NAME" = "MPA_NAME_WIOMETT_trunk"), ignore_case=TRUE)
@@ -56,6 +56,8 @@ str(wiompas_fin)
 
 plot(st_geometry(wiompas_fin), col = "lightblue", border = "darkgray")
 
-st_write(wiompas_fin, "/Users/48483117/OneDrive - Macquarie University/Documents/wiompas_fin.shp")
+#save MPA polygons with data on enabling conditions from METT
+
+st_write(wiompas_fin, "shapefiles/wiompas_fin.shp")
 
 
