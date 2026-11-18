@@ -92,7 +92,7 @@ res.clus <- cluspcamix(data = wio_mpas_pca,
                        smartStart = NULL, 
                        seed = NULL)
 
-# View cluster assignments
+# View and append cluster assignments
 res.clus$cluster 
 
 

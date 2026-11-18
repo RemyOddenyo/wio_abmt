@@ -12,10 +12,10 @@ library(PCDimension)
 
 #rm(list=ls())
 
-wio_mpas <-read_csv("csv/wio_mpas_matrix.csv") # data with variables grouped by country e.g. hdi
+wio_mpas_2 <-read_csv("csv/wio_mpas_matrix.csv") # data with variables grouped by country e.g. hdi
 
 # Standardize all numeric columns
-wio_mpas_mfa <- wio_mpas[,-c(1:4,62,80)] %>% 
+wio_mpas_mfa <- wio_mpas_2 [,-c(1:4,62,80)] %>% 
  mutate(across(where(is.numeric), ~as.vector(scale(.))))
 
 wio_mpas_mfa <-  wio_mpas_mfa %>% 
@@ -66,6 +66,14 @@ set.seed(123)
 km <- kmeans(scores, centers = 15, nstart = 25)
 clusters <- as.factor(km$cluster)
 
+# View and append cluster assignments
+km$cluster
+
+wio_mpas_2$cluster<-km$cluster
+
+write.csv(wio_mpas_2,"wio_mpas_mfa_clus_2.csv")
+
+
 # eigenvalues
 
 mfamix$eig
@@ -98,6 +106,18 @@ write.csv(variable_quanti_mfa_cos2, "variable_quanti_mfa_cos2.csv")
 
 # Plot the individuals colored by their clusters
 plot(mfamix, choice="axes")
+
+mfamix$partial.axes$age_area
+
+mfamix$partial.axes$stage_level
+
+mfamix$partial.axes$internal_enabling_conditions
+
+mfamix$partial.axes$contextual_enabling_conditions
+
+mfamix$partial.axes$ecology
+
+mfamix$partial.axes$threats
 
 # Extract cos2
 var_quant_cos2_mfa_df <- as.data.frame(mfamix$quanti$cos2)
@@ -263,7 +283,7 @@ ggplot(levels_mfa_df, aes(x = `dim 1`, y = `dim 2`, label = Level)) +
   geom_hline(yintercept = 0, linetype = "dashed", color = "black") +
   geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
   labs(
-    title = "PCAmix: Levels Component Map",
+    title = "MFAmix: Levels Component Map",
     x = paste0("Dimension 1 (", pct1, "%)"),
     y = paste0("Dimension 2 (", pct2, "%)")
   ) +
@@ -279,7 +299,7 @@ ggplot(levels_mfa_df, aes(x = `dim 1`, y = `dim 3`, label = Level)) +
   geom_hline(yintercept = 0, linetype = "dashed", color = "black") +
   geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
   labs(
-    title = "PCAmix: Levels Component Map",
+    title = "MFAmix: Levels Component Map",
     x = paste0("Dimension 1 (", pct1, "%)"),
     y = paste0("Dimension 3 (", pct3, "%)")
   ) +
@@ -292,7 +312,7 @@ ggplot(levels_mfa_df, aes(x = `dim 2`, y = `dim 3`, label = Level)) +
   geom_hline(yintercept = 0, linetype = "dashed", color = "black") +
   geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
   labs(
-    title = "PCAmix: Levels Component Map",
+    title = "MFAmix: Levels Component Map",
     x = paste0("Dimension 2 (", pct2, "%)"),
     y = paste0("Dimension 3 (", pct3, "%)")
   ) +
@@ -331,7 +351,7 @@ ggplot(ind_coords_mfa, aes(x = `dim 1`, y = `dim 2`, color = `Protection level`,
   scale_color_manual(values=c("#3cb44b","#0045C1","#f58231","#800000"))+
   scale_shape_manual(values=c(1,2,0,4,5,6,12,8,9))+
   labs(
-    title = "PCAmix Individuals Plot",
+    title = "MFAmix Individuals Plot",
     x = paste0("Dimension 1 (", pc1_var, "%)"),
     y = paste0("Dimension 2 (", pc2_var, "%)"),
     color = "Protection level",
@@ -354,7 +374,7 @@ ggplot(ind_coords_mfa, aes(x = `dim 1`, y = `dim 2`, color = `Protection level`,
   ))+
   scale_shape_manual(values=c(1,2,0,4,5,6,12,8,9,10,11,3,13,14,15))+
   labs(
-    title = "PCAmix Individuals Plot",
+    title = "MFAmix Individuals Plot",
     x = paste0("Dimension 1 (", pc1_var, "%)"),
     y = paste0("Dimension 2 (", pc2_var, "%)")
   ) +
@@ -377,7 +397,7 @@ ggplot(ind_coords_mfa, aes(x = `dim 1`, y = `dim 3`, color = `Protection level`,
   ))+
   scale_shape_manual(values=c(1,2,0,4,5,6,12,8,9,10,11,3,13,14,15))+
   labs(
-    title = "PCAmix Individuals Plot",
+    title = "MFAmix Individuals Plot",
     x = paste0("Dimension 1 (", pc1_var, "%)"),
     y = paste0("Dimension 3 (", pc3_var, "%)")
   ) +
@@ -399,7 +419,7 @@ ggplot(ind_coords_mfa, aes(x = `dim 2`, y = `dim 3`, color = `Protection level`,
   ))+
   scale_shape_manual(values=c(1,2,0,4,5,6,12,8,9,10,11,3,13,14,15))+
   labs(
-    title = "PCAmix Individuals Plot",
+    title = "MFAmix Individuals Plot",
     x = paste0("Dimension 2 (", pc2_var, "%)"),
     y = paste0("Dimension 3 (", pc3_var, "%)")
   ) +
